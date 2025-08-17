@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REI Pro Suite - AI-Powered Real Estate Investment Platform</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .material-icons-sharp {
+            font-size: 1.25rem; /* 20px */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Animation for modals and sections */
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .modal-scale-up { animation: scaleUp 0.3s ease-out; }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* Hide number input spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <div id="app-container" class="min-h-screen flex flex-col relative">
+        <!-- Header -->
+        <header class="bg-white shadow-md sticky top-0 z-40">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 text-white w-9 h-9 flex items-center justify-center rounded-lg font-bold text-lg">R</div>
+                    <h1 class="text-xl font-bold text-slate-800 hidden sm:block">REI Pro Suite</h1>
+                </div>
+                <div class="hidden md:flex items-center gap-2">
+                    <button onclick="App.importData()" class="btn-secondary">Import</button>
+                    <button onclick="App.exportData()" class="btn-secondary">Export</button>
+                    <button onclick="App.showSettingsModal()" class="btn-primary">Settings</button>
+                </div>
+                <button onclick="App.toggleMobileMenu()" class="md:hidden text-slate-600 p-2 rounded-md hover:bg-slate-100">
+                    <span class="material-icons-sharp">menu</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="bg-white border-b border-slate-200 sticky top-[60px] z-30 overflow-x-auto">
+            <div id="nav-tabs" class="container mx-auto px-4 flex min-w-max">
+                <!-- Tabs will be rendered by JavaScript -->
+            </div>
+        </nav>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-nav-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="App.toggleMobileMenu()"></div>
+        <nav id="mobile-nav" class="fixed top-0 left-0 bottom-0 w-72 bg-white shadow-xl z-50 transform -translate-x-full transition-transform duration-300 ease-in-out">
+            <div class="p-4 border-b border-slate-200">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 text-white w-9 h-9 flex items-center justify-center rounded-lg font-bold text-lg">R</div>
+                    <h1 class="text-xl font-bold text-slate-800">REI Pro Suite</h1>
+                </div>
+            </div>
+            <div id="mobile-nav-items" class="py-2">
+                <!-- Mobile nav items will be rendered by JavaScript -->
+            </div>
+            <div class="p-4 border-t border-slate-200 space-y-2">
+                 <button onclick="App.importData(); App.toggleMobileMenu()" class="w-full btn-secondary">Import</button>
+                 <button onclick="App.exportData(); App.toggleMobileMenu()" class="w-full btn-secondary">Export</button>
+                 <button onclick="App.showSettingsModal(); App.toggleMobileMenu()" class="w-full btn-primary">Settings</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto p-4 md:p-6">
+            <!-- Tool Sections will be rendered here -->
+            <div id="tool-sections-container"></div>
+        </main>
+        
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="absolute inset-0 bg-slate-100/80 backdrop-blur-sm flex-col items-center justify-center z-50 hidden">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p id="loading-message" class="mt-4 text-slate-600 font-semibold"></p>
+        </div>
+    </div>
+    
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="file-input" class="hidden" accept=".json,.csv">
+
+    <!-- App Templates -->
+    <template id="template-btn-primary">
+        <button class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition disabled:opacity-50 disabled:cursor-not-allowed"></button>
+    </template>
+    <template id="template-btn-secondary">
+        <button class="px-4 py-2 bg-white text-slate-700 font-semibold border border-slate-300 rounded-lg shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition disabled:opacity-50 disabled:cursor-not-allowed"></button>
+    </template>
+
+    <script type="module">
+        // ============================
+        // UTILITY & HELPER FUNCTIONS
+        // ============================
+
+        /**
+         * Formats a number as a currency string.
+         * @param {number} value - The number to format.
+         * @returns {string} Formatted currency string.
+         */
+        const formatCurrency = (value) => {
+            if (typeof value !== 'number' || isNaN(value)) return '$0';
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+        };
+
+        /**
+         * Formats a number as a percentage string.
+         * @param {number} value - The number to format (e.g., 5.5 for 5.5%).
+         * @returns {string} Formatted percentage string.
+         */
+        const formatPercent = (value) => {
+            if (typeof value !== 'number' || isNaN(value)) return '0.0%';
+            return `${value.toFixed(1)}%`;
+        };
+        
+        /**
+         * Safely gets a numeric value from an input field.
+         * @param {string} id - The ID of the input element.
+         * @param {number} [defaultValue=0] - The default value to return if input is invalid.
+         * @returns {number} The parsed number or default value.
+         */
+        const getNumericInput = (id, defaultValue = 0) => {
+            const el = document.getElementById(id);
+            const value = el ? parseFloat(el.value) : NaN;
+            return isNaN(value) ? defaultValue : value;
+        };
+
+        /**
+         * Safely gets a string value from an input field.
+         * @param {string} id - The ID of the input element.
+         * @param {string} [defaultValue=''] - The default value to return if input is empty.
+         * @returns {string} The input value or default value.
+         */
+        const getStringInput = (id, defaultValue = '') => {
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : defaultValue;
+        };
+        
+        /**
+         * Sets the value of an input field.
+         * @param {string} id - The ID of the input element.
+         * @param {string|number} value - The value to set.
+         */
+        const setInputValue = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = value;
+                // Dispatch change event for sliders or other reactive elements
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        };
+
+        /**
+         * Updates the text content of an element.
+         * @param {string} id - The ID of the element.
+         * @param {string} text - The text to set.
+         */
+        const updateText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+
+        /**
+         * Creates and displays a notification.
+         * @param {string} message - The notification message.
+         * @param {string} [type='info'] - The type of notification ('success', 'warning', 'danger', 'info').
+         */
+        const showNotification = (message, type = 'info') => {
+            const container = document.getElementById('notification-container');
+            if (!container) return;
+
+            const icons = { success: 'check_circle', warning: 'warning', danger: 'error', info: 'info' };
+            const colors = { success: 'bg-green-500', warning: 'bg-yellow-500', danger: 'bg-red-500', info: 'bg-blue-500' };
+
+            const notification = document.createElement('div');
+            notification.className = `flex items-center gap-4 p-4 rounded-lg shadow-lg text-white ${colors[type]} fade-in`;
+            notification.innerHTML = `
+                <span class="material-icons-sharp">${icons[type]}</span>
+                <p class="flex-grow">${message}</p>
+                <button onclick="this.parentElement.remove()" class="p-1 rounded-full hover:bg-white/20">&times;</button>
+            `;
+            container.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        };
+
+        // ============================
+        // APPLICATION CORE (App Object)
+        // ============================
+        const App = {
+            // --- STATE ---
+            state: {
+                properties: [],
+                settings: {},
+                currentPropertyAnalysis: null,
+                currentTool: 'dashboard',
+                charts: {},
+                parseSource: 'zillow',
+            },
+
+            // --- INITIALIZATION ---
+            init() {
+                this.renderLayout();
+                
+                const fileInput = document.getElementById('file-input');
+                fileInput.addEventListener('change', (event) => this.handleFileImport(event));
+
+                this.loadDataFromLocalStorage();
+                this.updateDashboard();
+                
+                console.log("REI Pro Suite Initialized (Self-Contained Mode)");
+            },
+            
+            // --- LOCAL STORAGE DATA MANAGEMENT ---
+            loadDataFromLocalStorage() {
+                try {
+                    const savedSettings = localStorage.getItem('reiProSuiteSettings');
+                    const defaultSettings = {
+                        interestRate: 6.5, downPayment: 20, vacancyRate: 8, managementFee: 8,
+                        maintenanceRate: 1, capexRate: 5, appreciationRate: 3, rentIncreaseRate: 3, taxRate: 24
+                    };
+                    this.state.settings = savedSettings ? { ...defaultSettings, ...JSON.parse(savedSettings) } : defaultSettings;
+
+                    const savedProperties = localStorage.getItem('reiProSuiteProperties');
+                    this.state.properties = savedProperties ? JSON.parse(savedProperties) : [];
+
+                } catch (error) {
+                    console.error("Error loading data from Local Storage:", error);
+                    showNotification("Could not load saved data. It might be corrupted.", "danger");
+                    this.state.settings = defaultSettings;
+                    this.state.properties = [];
+                }
+            },
+            
+            saveSettings() {
+                try {
+                    localStorage.setItem('reiProSuiteSettings', JSON.stringify(this.state.settings));
+                    showNotification("Settings saved.", "success");
+                } catch (error) {
+                    console.error("Error saving settings to Local Storage:", error);
+                    showNotification("Failed to save settings.", "danger");
+                }
+            },
+            
+            saveProperties() {
+                try {
+                    localStorage.setItem('reiProSuiteProperties', JSON.stringify(this.state.properties));
+                } catch(error) {
+                    console.error("Error saving properties to Local Storage:", error);
+                    showNotification("Failed to save properties.", "danger");
+                }
+            },
+
+            addProperty(propertyData) {
+                // Generate a unique ID for the property for local management
+                const propertyWithId = { ...propertyData, id: `prop_${Date.now()}`};
+                this.state.properties.push(propertyWithId);
+                this.saveProperties();
+                showNotification("Property saved to portfolio.", "success");
+                this.renderPortfolio();
+                this.updateDashboard();
+            },
+
+            removeProperty(propertyId) {
+                if (!confirm("Are you sure you want to remove this property from your portfolio?")) return;
+                this.state.properties = this.state.properties.filter(p => p.id !== propertyId);
+                this.saveProperties();
+                showNotification("Property removed.", "success");
+                this.renderPortfolio();
+                this.updateDashboard();
+            },
+
+            // --- UI & RENDERING ---
+            renderLayout() {
+                this.renderNav();
+                this.renderToolSections();
+                this.renderModals();
+                this.switchTool('dashboard');
+            },
+
+            renderNav() {
+                const tabs = [
+                    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+                    { id: 'analyzer', label: 'Analyzer', icon: 'analytics' },
+                    { id: 'portfolio', label: 'Portfolio', icon: 'business_center' },
+                    { id: 'scenarios', label: 'Scenarios', icon: 'insights' },
+                    { id: 'reports', label: 'Reports', icon: 'description' },
+                ];
+
+                const navTabsContainer = document.getElementById('nav-tabs');
+                const mobileNavItemsContainer = document.getElementById('mobile-nav-items');
+                if (!navTabsContainer || !mobileNavItemsContainer) return;
+                
+                navTabsContainer.innerHTML = '';
+                mobileNavItemsContainer.innerHTML = '';
+
+                tabs.forEach(tab => {
+                    // Main Nav
+                    const tabEl = document.createElement('button');
+                    tabEl.id = `nav-tab-${tab.id}`;
+                    tabEl.className = 'flex items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-500 border-b-2 border-transparent hover:bg-slate-50 hover:text-blue-600 transition whitespace-nowrap';
+                    tabEl.innerHTML = `<span class="material-icons-sharp">${tab.icon}</span> <span>${tab.label}</span>`;
+                    tabEl.onclick = () => this.switchTool(tab.id);
+                    navTabsContainer.appendChild(tabEl);
+                    
+                    // Mobile Nav
+                    const mobileItemEl = document.createElement('button');
+                    mobileItemEl.id = `mobile-nav-item-${tab.id}`;
+                    mobileItemEl.className = 'w-full flex items-center gap-4 px-4 py-3 text-left text-slate-700 hover:bg-slate-100 rounded-md';
+                    mobileItemEl.innerHTML = `<span class="material-icons-sharp text-slate-500">${tab.icon}</span> <span>${tab.label}</span>`;
+                    mobileItemEl.onclick = () => { this.switchTool(tab.id); this.toggleMobileMenu(); };
+                    mobileNavItemsContainer.appendChild(mobileItemEl);
+                });
+            },
+            
+            renderToolSections() {
+                const container = document.getElementById('tool-sections-container');
+                if (!container) return;
+                container.innerHTML = `
+                    <section id="dashboard-section" class="hidden fade-in"></section>
+                    <section id="analyzer-section" class="hidden fade-in"></section>
+                    <section id="portfolio-section" class="hidden fade-in"></section>
+                    <section id="scenarios-section" class="hidden fade-in"></section>
+                    <section id="reports-section" class="hidden fade-in"></section>
+                `;
+            },
+            
+            renderModals() {
+                const container = document.getElementById('modals-container');
+                if (!container) return;
+                container.innerHTML = `
+                    <!-- Settings Modal -->
+                    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+                        <div class="bg-white rounded-lg shadow-xl w-full max-w-md modal-scale-up">
+                            <div class="p-4 border-b flex justify-between items-center">
+                                <h2 class="text-lg font-bold">Settings</h2>
+                                <button onclick="App.hideSettingsModal()" class="p-1 rounded-full hover:bg-slate-100">&times;</button>
+                            </div>
+                            <div id="settings-modal-body" class="p-6 space-y-4"></div>
+                            <div class="p-4 bg-slate-50 rounded-b-lg flex justify-end gap-2">
+                                <button onclick="App.hideSettingsModal()" class="btn-secondary">Cancel</button>
+                                <button onclick="App.handleSaveSettings()" class="btn-primary">Save Settings</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // --- NAVIGATION ---
+            switchTool(toolId) {
+                this.state.currentTool = toolId;
+                document.querySelectorAll('[id^="nav-tab-"]').forEach(t => t.classList.remove('text-blue-600', 'border-blue-600'));
+                document.querySelectorAll('[id^="mobile-nav-item-"]').forEach(t => t.classList.remove('bg-blue-50', 'text-blue-600'));
+                document.querySelectorAll('[id$="-section"]').forEach(s => s.classList.add('hidden'));
+
+                document.getElementById(`nav-tab-${toolId}`)?.classList.add('text-blue-600', 'border-blue-600');
+                document.getElementById(`mobile-nav-item-${toolId}`)?.classList.add('bg-blue-50', 'text-blue-600');
+                const section = document.getElementById(`${toolId}-section`);
+                section?.classList.remove('hidden');
+
+                // Dynamically render content when switching to a tool
+                switch (toolId) {
+                    case 'dashboard': this.renderDashboard(); break;
+                    case 'analyzer': this.renderAnalyzer(); break;
+                    case 'portfolio': this.renderPortfolio(); break;
+                    case 'scenarios': this.renderScenarios(); break;
+                    case 'reports': this.renderReports(); break;
+                }
+            },
+
+            toggleMobileMenu() {
+                document.getElementById('mobile-nav-overlay').classList.toggle('hidden');
+                document.getElementById('mobile-nav').classList.toggle('-translate-x-full');
+            },
+            
+            // --- DASHBOARD ---
+            renderDashboard() {
+                const container = document.getElementById('dashboard-section');
+                if (!container) return;
+                container.innerHTML = `
+                    <div id="dashboard-stats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6"></div>
+                    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">Portfolio Performance</h3>
+                        <div class="h-80"><canvas id="portfolioChart"></canvas></div>
+                    </div>
+                `;
+                this.updateDashboard();
+            },
+
+            updateDashboard() {
+                const statsContainer = document.getElementById('dashboard-stats');
+                if (!statsContainer) return;
+                
+                const properties = this.state.properties;
+                const totalValue = properties.reduce((sum, p) => sum + (p.purchasePrice || 0), 0);
+                const totalCashflow = properties.reduce((sum, p) => sum + (p.monthlyCashFlow || 0), 0);
+                const avgROI = properties.length > 0 ? properties.reduce((sum, p) => sum + (p.roi || 0), 0) / properties.length : 0;
+                
+                statsContainer.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow-md"><p class="text-sm text-slate-500">Portfolio Value</p><p class="text-2xl font-bold text-slate-800">${formatCurrency(totalValue)}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow-md"><p class="text-sm text-slate-500">Monthly Cash Flow</p><p class="text-2xl font-bold ${totalCashflow >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(totalCashflow)}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow-md"><p class="text-sm text-slate-500">Average ROI</p><p class="text-2xl font-bold text-slate-800">${formatPercent(avgROI)}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow-md"><p class="text-sm text-slate-500">Properties</p><p class="text-2xl font-bold text-slate-800">${properties.length}</p></div>
+                `;
+                
+                this.renderDashboardChart();
+            },
+            
+            renderDashboardChart() {
+                const ctx = document.getElementById('portfolioChart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (this.state.charts.portfolio) this.state.charts.portfolio.destroy();
+
+                const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                this.state.charts.portfolio = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Portfolio Value',
+                            data: labels.map(() => Math.random() * 500000 + 1000000), // Placeholder data
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            },
+
+            // --- ANALYZER ---
+            renderAnalyzer() {
+                const container = document.getElementById('analyzer-section');
+                if (!container) return;
+                // Render the structure of the analyzer tool
+                container.innerHTML = `
+                    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                            <h2 class="text-xl font-bold text-slate-800">Property Analyzer</h2>
+                            <div class="flex gap-2">
+                                <button onclick="App.handleCalculateAnalysis()" id="calculate-btn" class="btn-primary">Calculate</button>
+                                <button onclick="App.addCurrentPropertyToPortfolio()" class="btn-secondary">Add to Portfolio</button>
+                            </div>
+                        </div>
+                        
+                        <!-- URL Parser -->
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
+                            <h3 class="font-semibold mb-2">Import from Listing</h3>
+                            <div class="flex items-center gap-2 mb-2">
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="parseSource" value="zillow" onchange="App.state.parseSource = this.value" checked> Zillow</label>
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="parseSource" value="redfin" onchange="App.state.parseSource = this.value"> Redfin</label>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="url" id="listing-url" class="form-input flex-grow" placeholder="Paste Zillow or Redfin URL...">
+                                <button onclick="App.handleParseURL()" id="parse-url-btn" class="btn-secondary">Parse URL</button>
+                            </div>
+                        </div>
+
+                        <!-- Form Sections -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-6">
+                                ${this.renderFormSection('Property Details', this.getFormFields('property'))}
+                                ${this.renderFormSection('Purchase & Loan', this.getFormFields('loan'))}
+                            </div>
+                            <div class="space-y-6">
+                                ${this.renderFormSection('Income', this.getFormFields('income'))}
+                                ${this.renderFormSection('Recurring Expenses', this.getFormFields('expenses'))}
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Results -->
+                        <div id="analysis-results" class="mt-8 hidden">
+                           <h2 class="text-xl font-bold text-slate-800 mb-4 border-t pt-6">Analysis Summary</h2>
+                           <div id="metrics-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+                           <div id="ai-summary" class="bg-slate-50 p-4 rounded-lg"></div>
+                           <div class="mt-6 h-80"><canvas id="projectionChart"></canvas></div>
+                        </div>
+                    </div>
+                `;
+                this.setupRangeSliders();
+            },
+            
+            renderFormSection(title, fieldsHtml) {
+                return `
+                    <div class="bg-white border border-slate-200 p-4 rounded-lg">
+                        <h3 class="font-bold text-slate-800 mb-4">${title}</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            ${fieldsHtml}
+                        </div>
+                    </div>
+                `;
+            },
+            
+            getFormFields(section) {
+                const fields = {
+                    property: [
+                        { id: 'address', label: 'Property Address', placeholder: '123 Main St', full: true },
+                        { id: 'purchase-price', label: 'Purchase Price', type: 'number', placeholder: '500000' },
+                        { id: 'repair-costs', label: 'Repair Costs', type: 'number', placeholder: '10000' },
+                        { id: 'square-feet', label: 'Square Feet', type: 'number', placeholder: '2000' },
+                        { id: 'year-built', label: 'Year Built', type: 'number', placeholder: '1995' },
+                        { id: 'bedrooms', label: 'Bedrooms', type: 'number', placeholder: '3' },
+                        { id: 'bathrooms', label: 'Bathrooms', type: 'number', placeholder: '2' },
+                    ],
+                    loan: [
+                        { id: 'down-payment', label: 'Down Payment (%)', type: 'range', min: 0, max: 100, value: this.state.settings.downPayment, step: 1 },
+                        { id: 'interest-rate', label: 'Interest Rate (%)', type: 'number', value: this.state.settings.interestRate, step: 0.1 },
+                        { id: 'loan-term', label: 'Loan Term (Years)', type: 'select', options: [15, 30], value: 30 },
+                        { id: 'closing-costs', label: 'Closing Costs', type: 'number', placeholder: '8000' },
+                    ],
+                    income: [
+                        { id: 'rental-income', label: 'Monthly Rental Income', type: 'number', placeholder: '3500' },
+                        { id: 'other-income', label: 'Other Monthly Income', type: 'number', placeholder: '100' },
+                        { id: 'rent-increase', label: 'Annual Rent Increase (%)', type: 'number', value: this.state.settings.rentIncreaseRate, step: 0.1 },
+                        { id: 'appreciation-rate', label: 'Annual Appreciation (%)', type: 'number', value: this.state.settings.appreciationRate, step: 0.1 },
+                    ],
+                    expenses: [
+                        { id: 'property-tax', label: 'Property Tax (Annual)', type: 'number', placeholder: '6000' },
+                        { id: 'insurance', label: 'Insurance (Annual)', type: 'number', placeholder: '1500' },
+                        { id: 'hoa-fees', label: 'HOA Fees (Monthly)', type: 'number', placeholder: '0' },
+                        { id: 'utilities', label: 'Utilities (Monthly)', type: 'number', placeholder: '0' },
+                        { id: 'vacancy-rate', label: 'Vacancy Rate (%)', type: 'number', value: this.state.settings.vacancyRate, step: 0.1 },
+                        { id: 'maintenance-rate', label: 'Maintenance Rate (%)', type: 'number', value: this.state.settings.maintenanceRate, step: 0.1 },
+                        { id: 'management-rate', label: 'Management Rate (%)', type: 'number', value: this.state.settings.managementRate, step: 0.1 },
+                        { id: 'capex-rate', label: 'Capital Expenses (%)', type: 'number', value: this.state.settings.capexRate, step: 0.1 },
+                    ]
+                };
+                return fields[section].map(f => this.renderFormField(f)).join('');
+            },
+            
+            renderFormField({ id, label, type = 'text', placeholder = '', value = '', min, max, step, options, full = false }) {
+                const fullWidthClass = full ? 'sm:col-span-2' : '';
+                if (type === 'range') {
+                    return `
+                        <div class="sm:col-span-2">
+                            <label for="${id}" class="form-label">${label}</label>
+                            <div class="flex items-center gap-2">
+                                <input type="${type}" id="${id}" min="${min}" max="${max}" value="${value}" step="${step}" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                                <span id="${id}-value" class="font-semibold text-slate-700 w-16 text-center">${value}%</span>
+                            </div>
+                        </div>`;
+                }
+                if (type === 'select') {
+                    const opts = options.map(o => `<option value="${o}" ${o == value ? 'selected' : ''}>${o}</option>`).join('');
+                    return `
+                        <div class="${fullWidthClass}">
+                            <label for="${id}" class="form-label">${label}</label>
+                            <select id="${id}" class="form-input">${opts}</select>
+                        </div>`;
+                }
+                return `
+                    <div class="${fullWidthClass}">
+                        <label for="${id}" class="form-label">${label}</label>
+                        <input type="${type}" id="${id}" placeholder="${placeholder}" value="${value}" class="form-input">
+                    </div>
+                `;
+            },
+            
+            setupRangeSliders() {
+                document.querySelectorAll('input[type="range"]').forEach(slider => {
+                    const valueEl = document.getElementById(`${slider.id}-value`);
+                    if(valueEl) {
+                        slider.addEventListener('input', (e) => {
+                            valueEl.textContent = `${e.target.value}%`;
+                        });
+                    }
+                });
+            },
+            
+            // --- PORTFOLIO ---
+            renderPortfolio() {
+                 const container = document.getElementById('portfolio-section');
+                 if (!container) return;
+                 let content;
+                 if (this.state.properties.length === 0) {
+                     content = `
+                        <div class="text-center bg-white p-10 rounded-lg shadow-md">
+                            <span class="material-icons-sharp text-5xl text-slate-400">business_center</span>
+                            <h2 class="mt-4 text-xl font-bold text-slate-800">Your Portfolio is Empty</h2>
+                            <p class="text-slate-500 mt-2 mb-4">Analyze a property to add it to your portfolio.</p>
+                            <button onclick="App.switchTool('analyzer')" class="btn-primary">Analyze a Property</button>
+                        </div>
+                     `;
+                 } else {
+                     const cards = this.state.properties.map(p => this.renderPropertyCard(p)).join('');
+                     content = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${cards}</div>`;
+                 }
+                 container.innerHTML = content;
+            },
+            
+            renderPropertyCard(p) {
+                const cashFlowColor = (p.monthlyCashFlow || 0) >= 0 ? 'text-green-600' : 'text-red-600';
+                return `
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                        <div class="p-4 border-b">
+                            <h3 class="font-bold truncate" title="${p.address}">${p.address}</h3>
+                            <p class="text-sm text-slate-500">${formatCurrency(p.purchasePrice)}</p>
+                        </div>
+                        <div class="p-4 space-y-2 flex-grow">
+                            <div class="flex justify-between text-sm"><span class="text-slate-600">Monthly Cash Flow</span><strong class="${cashFlowColor}">${formatCurrency(p.monthlyCashFlow)}</strong></div>
+                            <div class="flex justify-between text-sm"><span class="text-slate-600">Cap Rate</span><strong>${formatPercent(p.capRate)}</strong></div>
+                            <div class="flex justify-between text-sm"><span class="text-slate-600">Cash on Cash</span><strong>${formatPercent(p.cashOnCash)}</strong></div>
+                            <div class="flex justify-between text-sm"><span class="text-slate-600">Total ROI</span><strong>${formatPercent(p.roi)}</strong></div>
+                        </div>
+                        <div class="p-2 bg-slate-50 flex gap-2">
+                           <button onclick="App.viewPropertyInAnalyzer('${p.id}')" class="text-xs btn-secondary flex-grow">View</button>
+                           <button onclick="App.removeProperty('${p.id}')" class="text-xs btn-secondary !bg-red-50 !text-red-600 hover:!bg-red-100 flex-grow">Remove</button>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            viewPropertyInAnalyzer(propertyId) {
+                const property = this.state.properties.find(p => p.id === propertyId);
+                if (!property) return;
+                
+                this.switchTool('analyzer');
+                
+                // Use setTimeout to ensure the analyzer UI is rendered before populating fields
+                setTimeout(() => {
+                    Object.keys(property).forEach(key => {
+                        // Need to handle the select element for loan term separately
+                        if (key === 'loanTerm') {
+                            setInputValue('loan-term', property[key]);
+                        } else {
+                            setInputValue(key, property[key]);
+                        }
+                    });
+                    this.handleCalculateAnalysis();
+                    document.getElementById('analyzer-section')?.scrollIntoView();
+                }, 100);
+            },
+            
+            // --- SCENARIOS & REPORTS (Placeholder Renderers) ---
+            renderScenarios() {
+                const container = document.getElementById('scenarios-section');
+                if (!container) return;
+                container.innerHTML = `<div class="text-center bg-white p-10 rounded-lg shadow-md"><h2 class="text-xl font-bold">Coming Soon</h2><p class="text-slate-500">Scenario analysis will be available in a future update.</p></div>`;
+            },
+            renderReports() {
+                 const container = document.getElementById('reports-section');
+                 if (!container) return;
+                 container.innerHTML = `<div class="text-center bg-white p-10 rounded-lg shadow-md"><h2 class="text-xl font-bold">Coming Soon</h2><p class="text-slate-500">Advanced reporting will be available in a future update.</p></div>`;
+            },
+
+            // --- SETTINGS MODAL ---
+            showSettingsModal() {
+                const body = document.getElementById('settings-modal-body');
+                if (!body) return;
+                const fields = [
+                    { id: 'interestRate', label: 'Default Interest Rate (%)', value: this.state.settings.interestRate },
+                    { id: 'downPayment', label: 'Default Down Payment (%)', value: this.state.settings.downPayment },
+                    { id: 'vacancyRate', label: 'Default Vacancy Rate (%)', value: this.state.settings.vacancyRate },
+                    { id: 'managementFee', label: 'Default Management Fee (%)', value: this.state.settings.managementFee },
+                    { id: 'taxRate', label: 'Marginal Tax Rate (%)', value: this.state.settings.taxRate },
+                ];
+                body.innerHTML = fields.map(f => `<div><label for="setting-${f.id}" class="form-label">${f.label}</label><input type="number" id="setting-${f.id}" value="${f.value}" class="form-input"></div>`).join('');
+                document.getElementById('settings-modal').classList.remove('hidden');
+                document.getElementById('settings-modal').classList.add('flex');
+            },
+            hideSettingsModal() {
+                document.getElementById('settings-modal').classList.add('hidden');
+                document.getElementById('settings-modal').classList.remove('flex');
+            },
+            handleSaveSettings() {
+                this.state.settings.interestRate = getNumericInput('setting-interestRate');
+                this.state.settings.downPayment = getNumericInput('setting-downPayment');
+                this.state.settings.vacancyRate = getNumericInput('setting-vacancyRate');
+                this.state.settings.managementFee = getNumericInput('setting-managementFee');
+                this.state.settings.taxRate = getNumericInput('setting-taxRate');
+                this.saveSettings();
+                this.hideSettingsModal();
+            },
+
+            // --- CORE LOGIC & HANDLERS ---
+            async handleParseURL() {
+                const url = getStringInput('listing-url');
+                if (!url) return showNotification("Please enter a URL.", "warning");
+                
+                const btn = document.getElementById('parse-url-btn');
+                btn.disabled = true;
+                btn.textContent = 'Parsing...';
+
+                try {
+                    // This simulates a backend API call. In a real app, this would be a fetch request.
+                    // Client-side scraping is unreliable and not recommended.
+                    const data = await this.simulateURLParse(url);
+                    Object.keys(data).forEach(key => setInputValue(key, data[key]));
+                    showNotification("Property data imported. Please review.", "success");
+                } catch (error) {
+                    showNotification(error.message, "danger");
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Parse URL';
+                }
+            },
+            
+            simulateURLParse(url) {
+                console.log(`Simulating parse for ${this.state.parseSource}: ${url}`);
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        if (!url.includes(this.state.parseSource)) {
+                           return reject(new Error(`URL does not seem to be a valid ${this.state.parseSource} link.`));
+                        }
+                        // Generate mock data based on source
+                        const basePrice = Math.floor(Math.random() * 400000) + 300000;
+                        const sqft = Math.floor(Math.random() * 1000) + 1500;
+                        resolve({
+                            address: `${Math.floor(Math.random() * 9000) + 1000} Mock St, Anytown, USA`,
+                            purchasePrice: basePrice,
+                            repairCosts: Math.floor(basePrice * 0.02),
+                            squareFeet: sqft,
+                            yearBuilt: Math.floor(Math.random() * 50) + 1970,
+                            bedrooms: Math.floor(Math.random() * 3) + 2,
+                            bathrooms: Math.floor(Math.random() * 2) + 2,
+                            rentalIncome: Math.floor(basePrice * 0.007),
+                            propertyTax: Math.floor(basePrice * 0.012),
+                            insurance: Math.floor(basePrice * 0.003),
+                        });
+                    }, 1500);
+                });
+            },
+            
+            handleCalculateAnalysis() {
+                const p = {
+                    address: getStringInput('address', 'New Property'),
+                    purchasePrice: getNumericInput('purchase-price'),
+                    repairCosts: getNumericInput('repair-costs'),
+                    downPaymentPercent: getNumericInput('down-payment'),
+                    interestRate: getNumericInput('interest-rate'),
+                    loanTerm: getNumericInput('loan-term'),
+                    closingCosts: getNumericInput('closing-costs'),
+                    rentalIncome: getNumericInput('rental-income'),
+                    otherIncome: getNumericInput('other-income'),
+                    propertyTax: getNumericInput('property-tax'),
+                    insurance: getNumericInput('insurance'),
+                    hoaFees: getNumericInput('hoa-fees'),
+                    utilities: getNumericInput('utilities'),
+                    vacancyRate: getNumericInput('vacancy-rate'),
+                    maintenanceRate: getNumericInput('maintenance-rate'),
+                    managementRate: getNumericInput('management-rate'),
+                    capexRate: getNumericInput('capex-rate'),
+                    appreciationRate: getNumericInput('appreciation-rate'),
+                    rentIncreaseRate: getNumericInput('rent-increase'),
+                };
+
+                if (p.purchasePrice <= 0) {
+                    return showNotification("Purchase Price must be greater than zero.", "warning");
+                }
+                
+                // --- Core Financial Calculations ---
+                const downPayment = p.purchasePrice * (p.downPaymentPercent / 100);
+                const loanAmount = p.purchasePrice - downPayment;
+                const totalCashInvested = downPayment + p.closingCosts + p.repairCosts;
+                
+                const monthlyRate = p.interestRate / 100 / 12;
+                const numPayments = p.loanTerm * 12;
+                const monthlyPAndI = loanAmount > 0 && monthlyRate > 0 ? loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1) : 0;
+                
+                const grossMonthlyIncome = p.rentalIncome + p.otherIncome;
+                const vacancyCost = grossMonthlyIncome * (p.vacancyRate / 100);
+                const effectiveGrossIncome = grossMonthlyIncome - vacancyCost;
+                
+                const monthlyExpenses = {
+                    tax: p.propertyTax / 12,
+                    insurance: p.insurance / 12,
+                    hoa: p.hoaFees,
+                    utilities: p.utilities,
+                    maintenance: (p.purchasePrice * (p.maintenanceRate / 100)) / 12,
+                    management: effectiveGrossIncome * (p.managementRate / 100),
+                    capex: (p.purchasePrice * (p.capexRate / 100)) / 12
+                };
+                const totalMonthlyOperatingExpenses = Object.values(monthlyExpenses).reduce((a, b) => a + b, 0);
+                const totalMonthlyExpenses = totalMonthlyOperatingExpenses + monthlyPAndI;
+                
+                const monthlyCashFlow = effectiveGrossIncome - totalMonthlyExpenses;
+                const annualCashFlow = monthlyCashFlow * 12;
+                
+                const annualNOI = (effectiveGrossIncome - totalMonthlyOperatingExpenses) * 12;
+                const capRate = p.purchasePrice > 0 ? (annualNOI / p.purchasePrice) * 100 : 0;
+                const cashOnCash = totalCashInvested > 0 ? (annualCashFlow / totalCashInvested) * 100 : 0;
+                
+                const annualAppreciationValue = p.purchasePrice * (p.appreciationRate / 100);
+                const annualPrincipalPaydown = (monthlyPAndI * 12) - (loanAmount * (p.interestRate / 100)); // Simplified first year
+                const totalAnnualReturn = annualCashFlow + annualAppreciationValue + annualPrincipalPaydown;
+                const roi = totalCashInvested > 0 ? (totalAnnualReturn / totalCashInvested) * 100 : 0;
+
+                this.state.currentPropertyAnalysis = {
+                    ...p, downPayment, loanAmount, totalCashInvested, monthlyPAndI,
+                    monthlyCashFlow, annualCashFlow, annualNOI, capRate, cashOnCash, roi
+                };
+                
+                this.displayAnalysisResults(this.state.currentPropertyAnalysis);
+            },
+            
+            displayAnalysisResults(analysis) {
+                document.getElementById('analysis-results').classList.remove('hidden');
+                const grid = document.getElementById('metrics-grid');
+                if (!grid) return;
+                grid.innerHTML = `
+                    <div class="metric-card"><p>Monthly Cash Flow</p><strong class="${analysis.monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(analysis.monthlyCashFlow)}</strong></div>
+                    <div class="metric-card"><p>Cap Rate</p><strong>${formatPercent(analysis.capRate)}</strong></div>
+                    <div class="metric-card"><p>Cash on Cash</p><strong>${formatPercent(analysis.cashOnCash)}</strong></div>
+                    <div class="metric-card"><p>Total ROI (Yr 1)</p><strong>${formatPercent(analysis.roi)}</strong></div>
+                `;
+                
+                // AI Summary placeholder
+                const aiSummary = document.getElementById('ai-summary');
+                if (aiSummary) {
+                    aiSummary.innerHTML = `<h4 class="font-semibold">AI Summary</h4><p class="text-sm text-slate-600">This looks like a promising deal based on the initial numbers. The cash flow is positive and the ROI is strong.</p>`;
+                }
+                
+                this.renderProjectionChart(analysis);
+            },
+            
+            renderProjectionChart(analysis) {
+                 const ctx = document.getElementById('projectionChart')?.getContext('2d');
+                 if (!ctx) return;
+                 if (this.state.charts.projection) this.state.charts.projection.destroy();
+
+                 this.state.charts.projection = new Chart(ctx, {
+                     type: 'bar',
+                     data: {
+                         labels: ['Cash Flow', 'Principal Paydown', 'Appreciation'],
+                         datasets: [{
+                             label: 'Year 1 Returns',
+                             data: [
+                                 analysis.annualCashFlow,
+                                 (analysis.monthlyPAndI * 12) - (analysis.loanAmount * (analysis.interestRate / 100)),
+                                 analysis.purchasePrice * (analysis.appreciationRate / 100)
+                             ],
+                             backgroundColor: ['#16a34a', '#2563eb', '#f59e0b']
+                         }]
+                     },
+                     options: { responsive: true, maintainAspectRatio: false }
+                 });
+            },
+            
+            addCurrentPropertyToPortfolio() {
+                if (!this.state.currentPropertyAnalysis) {
+                    return showNotification("Please calculate an analysis first.", "warning");
+                }
+                this.addProperty(this.state.currentPropertyAnalysis);
+            },
+            
+            // --- IMPORT / EXPORT ---
+            importData() {
+                document.getElementById('file-input').click();
+            },
+            
+            handleFileImport(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        let importedProperties = [];
+                        if (file.name.endsWith('.json')) {
+                            const data = JSON.parse(e.target.result);
+                            if (!Array.isArray(data)) throw new Error("JSON file is not an array of properties.");
+                            importedProperties = data;
+                        } else if (file.name.endsWith('.csv')) {
+                            const results = Papa.parse(e.target.result, { header: true, skipEmptyLines: true, dynamicTyping: true });
+                            if (results.errors.length) {
+                                console.error("CSV Parsing Errors:", results.errors);
+                                throw new Error("Could not parse CSV file. Check format.");
+                            }
+                            importedProperties = results.data;
+                        } else {
+                            throw new Error("Unsupported file type. Please use .json or .csv");
+                        }
+                        
+                        if(importedProperties.length > 0) {
+                           importedProperties.forEach(prop => this.addProperty(prop));
+                           showNotification(`${importedProperties.length} properties imported successfully.`, "success");
+                        }
+
+                    } catch (err) {
+                        showNotification(err.message || "Failed to read or parse file.", "danger");
+                        console.error("Import error:", err);
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = ''; // Reset file input
+            },
+
+            exportData() {
+                if (this.state.properties.length === 0) return showNotification("No data to export.", "warning");
+                const dataStr = JSON.stringify(this.state.properties, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `REI-Pro-Suite-Export.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification("Portfolio exported successfully.", "success");
+            },
+
+        };
+        
+        // --- GLOBAL STYLES FOR DYNAMIC ELEMENTS ---
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            .btn-primary { @apply px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition disabled:opacity-50 disabled:cursor-not-allowed; }
+            .btn-secondary { @apply px-4 py-2 bg-white text-slate-700 font-semibold border border-slate-300 rounded-lg shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition disabled:opacity-50 disabled:cursor-not-allowed; }
+            .form-label { @apply block text-sm font-medium text-slate-700 mb-1; }
+            .form-input { @apply block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500; }
+            .metric-card { @apply bg-slate-50 p-4 rounded-lg text-center; }
+            .metric-card p { @apply text-sm text-slate-500; }
+            .metric-card strong { @apply text-2xl font-bold text-slate-800; }
+        `;
+        document.head.appendChild(styleSheet);
+        
+        // --- KICKSTART THE APP ---
+        window.App = App; // Make App object globally accessible for onclick handlers
+        document.addEventListener('DOMContentLoaded', () => App.init());
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,3731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REI Pro Suite - AI-Powered Real Estate Investment Platform</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        /* CSS Reset & Base Styles */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Primary Colors */
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --secondary-light: #34d399;
+            
+            /* Status Colors */
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            /* Neutral Colors */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            
+            /* Typography */
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* Border Radius */
+            --radius-sm: 0.25rem;
+            --radius: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition: 200ms ease;
+            --transition-slow: 300ms ease;
+        }
+
+        /* Base Styles */
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--gray-900);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-First Layout Container */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--gray-50);
+        }
+
+        /* Header Styles */
+        .app-header {
+            background: white;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .header-content {
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .logo-text {
+                display: block;
+            }
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: flex;
+            padding: var(--spacing-sm);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-600);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        /* Navigation Tabs */
+        .nav-container {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 60px;
+            z-index: 30;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-tabs {
+            display: flex;
+            padding: 0 var(--spacing-md);
+            min-width: max-content;
+        }
+
+        .nav-tab {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: all var(--transition);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .nav-tab:hover {
+            color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .nav-tab-icon {
+            font-size: 1.1rem;
+        }
+
+        .nav-tab-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: var(--radius-full);
+            margin-left: var(--spacing-xs);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: var(--spacing-md);
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Tool Sections */
+        .tool-section {
+            display: none;
+            animation: fadeIn var(--transition-slow);
+        }
+
+        .tool-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Card Component */
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .card-body {
+            padding: var(--spacing-lg);
+        }
+
+        /* Dashboard Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+        }
+
+        @media (min-width: 640px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .form-grid.form-grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: all var(--transition);
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Input with Icon */
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            pointer-events: none;
+        }
+
+        .input-with-icon {
+            padding-left: 2.5rem;
+        }
+
+        /* Range Slider */
+        .range-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: var(--radius-full);
+            background: var(--gray-300);
+            outline: none;
+            transition: background var(--transition);
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: var(--radius-full);
+            background: var(--primary);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: var(--shadow-md);
+        }
+
+        .range-value {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-xs);
+        }
+
+        .range-value span {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            text-decoration: none;
+            line-height: 1.5;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--gray-200);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .btn-ghost:hover:not(:disabled) {
+            background: var(--gray-100);
+        }
+
+        .btn-sm {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            font-size: 0.75rem;
+        }
+
+        .btn-lg {
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: 1rem;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: var(--spacing-md);
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .data-table th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        /* Property Cards */
+        .property-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
+        }
+
+        @media (min-width: 768px) {
+            .property-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .property-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .property-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+        }
+
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .property-card-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: var(--spacing-lg);
+        }
+
+        .property-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .property-card-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .property-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .property-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm) 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .property-metric:last-child {
+            border-bottom: none;
+        }
+
+        .property-metric-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .property-metric-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        /* AI Score Badge */
+        .ai-score {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .ai-score.excellent {
+            background: var(--success);
+            color: white;
+        }
+
+        .ai-score.good {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .ai-score.fair {
+            background: var(--warning);
+            color: white;
+        }
+
+        .ai-score.poor {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Alert/Info Boxes */
+        .alert {
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+        }
+
+        .alert-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .alert-description {
+            font-size: 0.875rem;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            padding: var(--spacing-md);
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn var(--transition);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp var(--transition-slow);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-400);
+            cursor: pointer;
+            transition: color var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--gray-600);
+        }
+
+        .modal-body {
+            padding: var(--spacing-lg);
+        }
+
+        .modal-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+        }
+
+        /* Charts Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
+        }
+
+        @media (min-width: 768px) {
+            .chart-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Loading States */
+        .spinner {
+            border: 3px solid var(--gray-300);
+            border-top-color: var(--primary);
+            border-radius: var(--radius-full);
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-300) 50%, var(--gray-200) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: var(--radius);
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Tabs Component */
+        .tabs {
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .tabs-list {
+            display: flex;
+            gap: var(--spacing-lg);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-trigger {
+            padding: var(--spacing-sm) 0;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab-trigger:hover {
+            color: var(--primary);
+        }
+
+        .tab-trigger.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn var(--transition);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Metric Cards for Analysis */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        @media (min-width: 640px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .metrics-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .metric-card {
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .metric-card-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .metric-card-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .metric-card-change {
+            font-size: 0.75rem;
+            margin-top: var(--spacing-xs);
+        }
+
+        /* Responsive Utilities */
+        .mobile-only {
+            display: block;
+        }
+
+        .desktop-only {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-only {
+                display: none;
+            }
+            
+            .desktop-only {
+                display: block;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .app-header,
+            .nav-container,
+            .btn,
+            .modal {
+                display: none !important;
+            }
+            
+            .main-content {
+                padding: 0;
+            }
+            
+            .card {
+                box-shadow: none;
+                border: 1px solid var(--gray-300);
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-400);
+            border-radius: var(--radius-full);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-500);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip-content {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-900);
+            color: white;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .tooltip:hover .tooltip-content {
+            opacity: 1;
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            padding: var(--spacing-sm);
+            min-width: 200px;
+            display: none;
+            z-index: 20;
+        }
+
+        .dropdown.active .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: background var(--transition);
+        }
+
+        .dropdown-item:hover {
+            background: var(--gray-100);
+        }
+
+        /* Progress Bar */
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: var(--radius-full);
+            transition: width var(--transition-slow);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag-primary {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .tag-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .tag-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .tag-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* File Upload */
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xl);
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-md);
+            background: var(--gray-50);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .file-upload-icon {
+            font-size: 2rem;
+            color: var(--gray-400);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .file-upload-text {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-2xl);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: var(--gray-400);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .empty-state-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .empty-state-description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .divider-vertical {
+            width: 1px;
+            height: 100%;
+            background: var(--gray-200);
+            margin: 0 var(--spacing-md);
+        }
+
+        /* List Styles */
+        .list-group {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .list-item {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background var(--transition);
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background: var(--gray-50);
+        }
+
+        .list-item-content {
+            flex: 1;
+        }
+
+        .list-item-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-900);
+        }
+
+        .list-item-subtitle {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-top: var(--spacing-xs);
+        }
+
+        /* Mobile Navigation Menu */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            bottom: 0;
+            width: 280px;
+            background: white;
+            box-shadow: var(--shadow-xl);
+            z-index: 50;
+            transition: left var(--transition-slow);
+            overflow-y: auto;
+        }
+
+        .mobile-nav.active {
+            left: 0;
+        }
+
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 49;
+            display: none;
+        }
+
+        .mobile-nav-overlay.active {
+            display: block;
+        }
+
+        .mobile-nav-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .mobile-nav-item {
+            display: block;
+            width: 100%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+
+        .mobile-nav-item:hover {
+            background: var(--gray-50);
+        }
+
+        .mobile-nav-item.active {
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 100;
+            max-width: 400px;
+            animation: slideInRight var(--transition-slow);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">REI</div>
+                    <div class="logo-text">REI Pro Suite</div>
+                </div>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menu">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12h18M3 6h18M3 18h18"/>
+                    </svg>
+                </button>
+                <div class="btn-group desktop-only">
+                    <button class="btn btn-secondary btn-sm" onclick="importData()">Import</button>
+                    <button class="btn btn-secondary btn-sm" onclick="exportData()">Export</button>
+                    <button class="btn btn-primary btn-sm" onclick="showSettings()">Settings</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTool('dashboard')" data-tool="dashboard">
+                    <span class="nav-tab-icon">📊</span>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-tab" onclick="switchTool('analyzer')" data-tool="analyzer">
+                    <span class="nav-tab-icon">🔍</span>
+                    <span>Analyzer</span>
+                </button>
+                <button class="nav-tab" onclick="switchTool('portfolio')" data-tool="portfolio">
+                    <span class="nav-tab-icon">🏘️</span>
+                    <span>Portfolio</span>
+                    <span class="nav-tab-badge" id="portfolio-badge">0</span>
+                </button>
+                <button class="nav-tab" onclick="switchTool('scenarios')" data-tool="scenarios">
+                    <span class="nav-tab-icon">📈</span>
+                    <span>Scenarios</span>
+                </button>
+                <button class="nav-tab" onclick="switchTool('reports')" data-tool="reports">
+                    <span class="nav-tab-icon">📄</span>
+                    <span>Reports</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Navigation Menu -->
+        <div class="mobile-nav-overlay" onclick="toggleMobileMenu()"></div>
+        <nav class="mobile-nav">
+            <div class="mobile-nav-header">
+                <div class="logo">
+                    <div class="logo-icon">REI</div>
+                    <div class="logo-text">REI Pro Suite</div>
+                </div>
+            </div>
+            <button class="mobile-nav-item active" onclick="switchTool('dashboard'); toggleMobileMenu()">
+                📊 Dashboard
+            </button>
+            <button class="mobile-nav-item" onclick="switchTool('analyzer'); toggleMobileMenu()">
+                🔍 Property Analyzer
+            </button>
+            <button class="mobile-nav-item" onclick="switchTool('portfolio'); toggleMobileMenu()">
+                🏘️ Portfolio Manager
+            </button>
+            <button class="mobile-nav-item" onclick="switchTool('scenarios'); toggleMobileMenu()">
+                📈 Scenario Analysis
+            </button>
+            <button class="mobile-nav-item" onclick="switchTool('reports'); toggleMobileMenu()">
+                📄 Reports
+            </button>
+            <div class="divider"></div>
+            <button class="mobile-nav-item" onclick="importData(); toggleMobileMenu()">
+                📥 Import Data
+            </button>
+            <button class="mobile-nav-item" onclick="exportData(); toggleMobileMenu()">
+                📤 Export Data
+            </button>
+            <button class="mobile-nav-item" onclick="showSettings(); toggleMobileMenu()">
+                ⚙️ Settings
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="tool-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Portfolio Value</div>
+                        <div class="stat-value" id="portfolio-value">$0</div>
+                        <div class="stat-change positive">
+                            <span>↑</span>
+                            <span>12.3% YTD</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Monthly Cash Flow</div>
+                        <div class="stat-value" id="total-cashflow">$0</div>
+                        <div class="stat-change positive">
+                            <span>↑</span>
+                            <span>$450 vs last month</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Average ROI</div>
+                        <div class="stat-value" id="avg-roi">0%</div>
+                        <div class="stat-change positive">
+                            <span>↑</span>
+                            <span>2.1% vs last year</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Properties</div>
+                        <div class="stat-value" id="property-count">0</div>
+                        <div class="stat-change">
+                            <span id="performing-count">0 performing above target</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Portfolio Performance</h2>
+                        <select class="form-select" style="width: auto;" onchange="updateDashboardChart(this.value)">
+                            <option value="12">Last 12 Months</option>
+                            <option value="6">Last 6 Months</option>
+                            <option value="3">Last 3 Months</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="portfolioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Cash Flow by Property</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="cashflowChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Property Types</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="propertyTypeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Property Analyzer Section -->
+            <section id="analyzer" class="tool-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Property Analysis</h2>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary btn-sm" onclick="parseListingURL()">
+                                🔗 Import from URL
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="calculateAnalysis()">
+                                Calculate
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- URL Import -->
+                        <div class="alert alert-info" style="margin-bottom: var(--spacing-lg);">
+                            <div class="alert-icon">ℹ️</div>
+                            <div class="alert-content">
+                                <div class="alert-title">Quick Import</div>
+                                <div class="alert-description">
+                                    Paste a Zillow or Redfin URL to automatically import property details
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: var(--spacing-lg);">
+                            <label class="form-label">Property Listing URL</label>
+                            <div class="input-group">
+                                <input type="text" class="form-input" id="listing-url" 
+                                       placeholder="https://www.zillow.com/homedetails/...">
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <!-- Property Details Tabs -->
+                        <div class="tabs">
+                            <div class="tabs-list">
+                                <button class="tab-trigger active" onclick="switchAnalyzerTab('basic')">
+                                    Basic Info
+                                </button>
+                                <button class="tab-trigger" onclick="switchAnalyzerTab('financial')">
+                                    Financials
+                                </button>
+                                <button class="tab-trigger" onclick="switchAnalyzerTab('expenses')">
+                                    Expenses
+                                </button>
+                                <button class="tab-trigger" onclick="switchAnalyzerTab('summary')">
+                                    AI Summary
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Basic Info Tab -->
+                        <div id="basic-tab" class="tab-content active">
+                            <div class="form-grid form-grid-3">
+                                <div class="form-group">
+                                    <label class="form-label">Property Address</label>
+                                    <input type="text" class="form-input" id="address" 
+                                           placeholder="123 Main St, City, State">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Property Type</label>
+                                    <select class="form-select" id="property-type">
+                                        <option value="single-family">Single Family</option>
+                                        <option value="multi-family">Multi-Family</option>
+                                        <option value="condo">Condo</option>
+                                        <option value="townhouse">Townhouse</option>
+                                        <option value="commercial">Commercial</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Purchase Price</label>
+                                    <input type="number" class="form-input" id="purchase-price" 
+                                           placeholder="500000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Bedrooms</label>
+                                    <input type="number" class="form-input" id="bedrooms" 
+                                           placeholder="3">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Bathrooms</label>
+                                    <input type="number" class="form-input" id="bathrooms" 
+                                           placeholder="2" step="0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Square Feet</label>
+                                    <input type="number" class="form-input" id="square-feet" 
+                                           placeholder="2000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Year Built</label>
+                                    <input type="number" class="form-input" id="year-built" 
+                                           placeholder="2010">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Lot Size (sq ft)</label>
+                                    <input type="number" class="form-input" id="lot-size" 
+                                           placeholder="7500">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Units</label>
+                                    <input type="number" class="form-input" id="units" 
+                                           placeholder="1" min="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Tab -->
+                        <div id="financial-tab" class="tab-content">
+                            <div class="form-grid form-grid-3">
+                                <div class="form-group">
+                                    <label class="form-label">Down Payment (%)</label>
+                                    <input type="range" class="range-slider" id="down-payment-slider" 
+                                           min="0" max="100" value="20" 
+                                           oninput="updateRangeValue('down-payment', this.value)">
+                                    <div class="range-value">
+                                        <span>0%</span>
+                                        <span id="down-payment-value">20%</span>
+                                        <span>100%</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Interest Rate (%)</label>
+                                    <input type="number" class="form-input" id="interest-rate" 
+                                           value="6.5" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Loan Term (years)</label>
+                                    <select class="form-select" id="loan-term">
+                                        <option value="15">15 years</option>
+                                        <option value="30" selected>30 years</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Monthly Rental Income</label>
+                                    <input type="number" class="form-input" id="rental-income" 
+                                           placeholder="3500">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Other Monthly Income</label>
+                                    <input type="number" class="form-input" id="other-income" 
+                                           placeholder="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Closing Costs</label>
+                                    <input type="number" class="form-input" id="closing-costs" 
+                                           placeholder="10000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Repair/Rehab Costs</label>
+                                    <input type="number" class="form-input" id="repair-costs" 
+                                           placeholder="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Annual Appreciation (%)</label>
+                                    <input type="number" class="form-input" id="appreciation-rate" 
+                                           value="3" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Annual Rent Increase (%)</label>
+                                    <input type="number" class="form-input" id="rent-increase" 
+                                           value="3" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expenses Tab -->
+                        <div id="expenses-tab" class="tab-content">
+                            <div class="form-grid form-grid-3">
+                                <div class="form-group">
+                                    <label class="form-label">Property Tax (Annual)</label>
+                                    <input type="number" class="form-input" id="property-tax" 
+                                           placeholder="6000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Insurance (Annual)</label>
+                                    <input type="number" class="form-input" id="insurance" 
+                                           placeholder="1500">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">HOA Fees (Monthly)</label>
+                                    <input type="number" class="form-input" id="hoa-fees" 
+                                           placeholder="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Maintenance (%)</label>
+                                    <input type="number" class="form-input" id="maintenance-rate" 
+                                           value="1" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Vacancy Rate (%)</label>
+                                    <input type="number" class="form-input" id="vacancy-rate" 
+                                           value="8" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Property Management (%)</label>
+                                    <input type="number" class="form-input" id="management-rate" 
+                                           value="8" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Utilities (Monthly)</label>
+                                    <input type="number" class="form-input" id="utilities" 
+                                           placeholder="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Capital Expenses (%)</label>
+                                    <input type="number" class="form-input" id="capex-rate" 
+                                           value="5" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Other Monthly Expenses</label>
+                                    <input type="number" class="form-input" id="other-expenses" 
+                                           placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Summary Tab -->
+                        <div id="summary-tab" class="tab-content">
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-card-label">AI Deal Score</div>
+                                    <div class="metric-card-value" id="ai-score">--</div>
+                                    <div class="metric-card-change">
+                                        <span class="ai-score good" id="ai-score-badge">Calculate First</span>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-card-label">Monthly Cash Flow</div>
+                                    <div class="metric-card-value" id="monthly-cashflow">$0</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-card-label">Cap Rate</div>
+                                    <div class="metric-card-value" id="cap-rate">0%</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-card-label">Cash on Cash Return</div>
+                                    <div class="metric-card-value" id="cash-on-cash">0%</div>
+                                </div>
+                            </div>
+
+                            <div class="card" style="margin-top: var(--spacing-lg);">
+                                <div class="card-header">
+                                    <h3 class="card-title">AI Investment Analysis</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div id="ai-analysis">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">🤖</div>
+                                            <div class="empty-state-title">No Analysis Yet</div>
+                                            <div class="empty-state-description">
+                                                Calculate the property analysis to get AI-powered insights
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card" style="margin-top: var(--spacing-lg);">
+                                <div class="card-header">
+                                    <h3 class="card-title">30-Year Projection</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="projectionChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Portfolio Section -->
+            <section id="portfolio" class="tool-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Property Portfolio</h2>
+                        <button class="btn btn-primary btn-sm" onclick="addPropertyToPortfolio()">
+                            + Add Property
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="portfolio-content">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🏘️</div>
+                                <div class="empty-state-title">No Properties Yet</div>
+                                <div class="empty-state-description">
+                                    Add properties from the analyzer or import your portfolio
+                                </div>
+                                <button class="btn btn-primary" onclick="switchTool('analyzer')">
+                                    Analyze First Property
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+   <!-- Scenarios Section -->
+            <section id="scenarios" class="tool-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Sensitivity Analysis</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <div class="alert-icon">📊</div>
+                            <div class="alert-content">
+                                <div class="alert-title">What-If Analysis</div>
+                                <div class="alert-description">
+                                    See how changes in key variables affect your returns
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="margin-top: var(--spacing-lg);">
+                            <div class="form-group">
+                                <label class="form-label">Interest Rate Change (%)</label>
+                                <input type="range" class="range-slider" id="scenario-interest" 
+                                       min="-2" max="2" value="0" step="0.25"
+                                       oninput="updateScenarios()">
+                                <div class="range-value">
+                                    <span>-2%</span>
+                                    <span id="scenario-interest-value">0%</span>
+                                    <span>+2%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Vacancy Rate Change (%)</label>
+                                <input type="range" class="range-slider" id="scenario-vacancy" 
+                                       min="-5" max="5" value="0" step="0.5"
+                                       oninput="updateScenarios()">
+                                <div class="range-value">
+                                    <span>-5%</span>
+                                    <span id="scenario-vacancy-value">0%</span>
+                                    <span>+5%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Rental Income Change (%)</label>
+                                <input type="range" class="range-slider" id="scenario-rent" 
+                                       min="-10" max="10" value="0" step="1"
+                                       oninput="updateScenarios()">
+                                <div class="range-value">
+                                    <span>-10%</span>
+                                    <span id="scenario-rent-value">0%</span>
+                                    <span>+10%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-container" style="margin-top: var(--spacing-xl);">
+                            <table class="data-table" id="scenario-table">
+                                <thead>
+                                    <tr>
+                                        <th>Scenario</th>
+                                        <th>Monthly Cash Flow</th>
+                                        <th>ROI</th>
+                                        <th>Cap Rate</th>
+                                        <th>Impact</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Base Case</td>
+                                        <td id="base-cashflow">$0</td>
+                                        <td id="base-roi">0%</td>
+                                        <td id="base-cap">0%</td>
+                                        <td>--</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Current Scenario</td>
+                                        <td id="scenario-cashflow">$0</td>
+                                        <td id="scenario-roi">0%</td>
+                                        <td id="scenario-cap">0%</td>
+                                        <td id="scenario-impact">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card" style="margin-top: var(--spacing-xl);">
+                            <div class="card-header">
+                                <h3 class="card-title">Scenario Comparison</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="scenarioChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="tool-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Generate Reports</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="property-grid">
+                            <div class="property-card">
+                                <div class="property-card-header">
+                                    <div class="property-card-title">Portfolio Summary</div>
+                                    <div class="property-card-subtitle">Complete overview of all properties</div>
+                                </div>
+                                <div class="property-card-body">
+                                    <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: var(--spacing-md);">
+                                        Generate a comprehensive PDF report of your entire portfolio including all metrics, charts, and projections.
+                                    </p>
+                                    <button class="btn btn-primary btn-block" onclick="generateReport('portfolio')">
+                                        Generate Portfolio Report
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="property-card">
+                                <div class="property-card-header">
+                                    <div class="property-card-title">Property Analysis</div>
+                                    <div class="property-card-subtitle">Detailed single property report</div>
+                                </div>
+                                <div class="property-card-body">
+                                    <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: var(--spacing-md);">
+                                        Create a professional property analysis report perfect for lenders, partners, or documentation.
+                                    </p>
+                                    <button class="btn btn-primary btn-block" onclick="generateReport('property')">
+                                        Generate Property Report
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="property-card">
+                                <div class="property-card-header">
+                                    <div class="property-card-title">Tax Report</div>
+                                    <div class="property-card-subtitle">Annual tax documentation</div>
+                                </div>
+                                <div class="property-card-body">
+                                    <p style="font-size: 0.875rem; color: var(--gray-600); margin-bottom: var(--spacing-md);">
+                                        Export tax-ready reports with depreciation schedules and expense breakdowns.
+                                    </p>
+                                    <button class="btn btn-primary btn-block" onclick="generateReport('tax')">
+                                        Generate Tax Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Settings</h2>
+                <button class="modal-close" onclick="closeSettings()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Default Interest Rate (%)</label>
+                    <input type="number" class="form-input" id="default-interest" value="6.5" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Default Down Payment (%)</label>
+                    <input type="number" class="form-input" id="default-down" value="20" step="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Default Vacancy Rate (%)</label>
+                    <input type="number" class="form-input" id="default-vacancy" value="8" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Default Management Fee (%)</label>
+                    <input type="number" class="form-input" id="default-management" value="8" step="0.5">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Marginal Tax Rate (%)</label>
+                    <input type="number" class="form-input" id="tax-rate" value="24" step="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="file-input" style="display: none;" accept=".json,.csv">
+
+    <script>
+        // ============================
+        // Global State Management
+        // ============================
+        const AppState = {
+            properties: [],
+            currentProperty: null,
+            settings: {
+                interestRate: 6.5,
+                downPayment: 20,
+                vacancyRate: 8,
+                managementFee: 8,
+                maintenanceRate: 1,
+                capexRate: 5,
+                appreciationRate: 3,
+                rentIncreaseRate: 3,
+                taxRate: 24
+            },
+            charts: {},
+            currentTool: 'dashboard',
+            analyzerTab: 'basic',
+            baseScenario: null
+        };
+
+        // ============================
+        // Initialize Application
+        // ============================
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                loadSettings();
+                loadProperties();
+                initializeCharts();
+                updateDashboard();
+                setupEventListeners();
+                console.log('REI Pro Suite initialized successfully');
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showNotification('Error initializing application. Please refresh the page.', 'danger');
+            }
+        });
+
+        function setupEventListeners() {
+            // Range slider updates
+            document.querySelectorAll('.range-slider').forEach(slider => {
+                slider.addEventListener('input', function() {
+                    const valueSpan = document.getElementById(this.id + '-value');
+                    if (valueSpan) {
+                        valueSpan.textContent = this.value + '%';
+                    }
+                });
+            });
+
+            // File input for import
+            const fileInput = document.getElementById('file-input');
+            if (fileInput) {
+                fileInput.addEventListener('change', handleFileImport);
+            }
+
+            // Close modals on outside click
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            });
+
+            // Down payment slider
+            const downPaymentSlider = document.getElementById('down-payment-slider');
+            if (downPaymentSlider) {
+                downPaymentSlider.addEventListener('input', function() {
+                    const downPaymentValue = document.getElementById('down-payment-value');
+                    if (downPaymentValue) {
+                        downPaymentValue.textContent = this.value + '%';
+                    }
+                });
+            }
+        }
+
+        // ============================
+        // Notification System
+        // ============================
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} notification`;
+            notification.innerHTML = `
+                <div class="alert-icon">${getNotificationIcon(type)}</div>
+                <div class="alert-content">
+                    <div class="alert-description">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                success: '✓',
+                warning: '⚠️',
+                danger: '❌',
+                info: 'ℹ️'
+            };
+            return icons[type] || icons.info;
+        }
+
+        // ============================
+        // Navigation Functions
+        // ============================
+        function switchTool(toolName) {
+            // Update active states
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.tool === toolName) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            document.querySelectorAll('.tool-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const targetSection = document.getElementById(toolName);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            AppState.currentTool = toolName;
+            
+            // Update mobile nav
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.toLowerCase().includes(toolName)) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Tool-specific initialization
+            if (toolName === 'dashboard') {
+                updateDashboard();
+            } else if (toolName === 'portfolio') {
+                renderPortfolio();
+            } else if (toolName === 'scenarios') {
+                initializeScenarios();
+            }
+        }
+
+        function switchAnalyzerTab(tabName) {
+            document.querySelectorAll('.tab-trigger').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Find and activate the clicked tab
+            event.target.classList.add('active');
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+            
+            AppState.analyzerTab = tabName;
+        }
+
+        function toggleMobileMenu() {
+            const nav = document.querySelector('.mobile-nav');
+            const overlay = document.querySelector('.mobile-nav-overlay');
+            
+            if (nav && overlay) {
+                nav.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+        }
+
+        // ============================
+        // Chart Initialization
+        // ============================
+        function initializeCharts() {
+            try {
+                // Portfolio Performance Chart
+                const portfolioCtx = document.getElementById('portfolioChart');
+                if (portfolioCtx) {
+                    AppState.charts.portfolio = new Chart(portfolioCtx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: [],
+                            datasets: [{
+                                label: 'Portfolio Value',
+                                data: [],
+                                borderColor: '#2563eb',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                tension: 0.4
+                            }, {
+                                label: 'Total Equity',
+                                data: [],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': $' + 
+                                                   context.parsed.y.toLocaleString();
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + (value / 1000) + 'k';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Cash Flow Chart
+                const cashflowCtx = document.getElementById('cashflowChart');
+                if (cashflowCtx) {
+                    AppState.charts.cashflow = new Chart(cashflowCtx.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: [],
+                            datasets: [{
+                                label: 'Monthly Cash Flow',
+                                data: [],
+                                backgroundColor: '#10b981'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + value.toLocaleString();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Property Type Chart
+                const typeCtx = document.getElementById('propertyTypeChart');
+                if (typeCtx) {
+                    AppState.charts.propertyType = new Chart(typeCtx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Single Family', 'Multi-Family', 'Condo', 'Commercial'],
+                            datasets: [{
+                                data: [0, 0, 0, 0],
+                                backgroundColor: [
+                                    '#2563eb',
+                                    '#10b981',
+                                    '#f59e0b',
+                                    '#ef4444'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Projection Chart
+                const projectionCtx = document.getElementById('projectionChart');
+                if (projectionCtx) {
+                    AppState.charts.projection = new Chart(projectionCtx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: [],
+                            datasets: [{
+                                label: 'Property Value',
+                                data: [],
+                                borderColor: '#2563eb',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                tension: 0.4
+                            }, {
+                                label: 'Loan Balance',
+                                data: [],
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                tension: 0.4
+                            }, {
+                                label: 'Equity',
+                                data: [],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.dataset.label;
+                                            const value = '$' + context.parsed.y.toLocaleString();
+                                            return label + ': ' + value;
+                                        },
+                                        afterBody: function(tooltipItems) {
+                                            const yearIndex = tooltipItems[0].dataIndex;
+                                            const year = yearIndex + 1;
+                                            return '\nYear ' + year + ' Details:\n' +
+                                                   'Net Income: $' + (AppState.currentProperty?.netIncome * 12 * year || 0).toLocaleString();
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + (value / 1000) + 'k';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Scenario Chart
+                const scenarioCtx = document.getElementById('scenarioChart');
+                if (scenarioCtx) {
+                    AppState.charts.scenario = new Chart(scenarioCtx.getContext('2d'), {
+                        type: 'radar',
+                        data: {
+                            labels: ['Cash Flow', 'ROI', 'Cap Rate', 'Risk Score', 'Deal Score'],
+                            datasets: [{
+                                label: 'Base Case',
+                                data: [0, 0, 0, 0, 0],
+                                borderColor: '#2563eb',
+                                backgroundColor: 'rgba(37, 99, 235, 0.2)'
+                            }, {
+                                label: 'Current Scenario',
+                                data: [0, 0, 0, 0, 0],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.2)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    max: 100
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Chart initialization error:', error);
+            }
+        }
+
+        // ============================
+        // Dashboard Functions
+        // ============================
+        function updateDashboard() {
+            try {
+                const properties = AppState.properties;
+                
+                // Update stats
+                const totalValue = properties.reduce((sum, p) => sum + (p.currentValue || p.purchasePrice), 0);
+                const totalCashflow = properties.reduce((sum, p) => sum + p.monthlyCashFlow, 0);
+                const avgROI = properties.length > 0 ? 
+                    properties.reduce((sum, p) => sum + p.roi, 0) / properties.length : 0;
+                const performingCount = properties.filter(p => p.roi > 10).length;
+                
+                updateElementText('portfolio-value', '$' + totalValue.toLocaleString());
+                updateElementText('total-cashflow', '$' + totalCashflow.toLocaleString());
+                updateElementText('avg-roi', avgROI.toFixed(1) + '%');
+                updateElementText('property-count', properties.length);
+                updateElementText('performing-count', performingCount + ' performing above target');
+                updateElementText('portfolio-badge', properties.length);
+                
+                // Update charts
+                updateDashboardCharts();
+            } catch (error) {
+                console.error('Dashboard update error:', error);
+            }
+        }
+
+        function updateElementText(id, text) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = text;
+            }
+        }
+
+        function updateDashboardChart(months) {
+            updateDashboardCharts();
+        }
+
+        function updateDashboardCharts() {
+            try {
+                const properties = AppState.properties;
+                
+                if (AppState.charts.portfolio && properties.length > 0) {
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const currentMonth = new Date().getMonth();
+                    const labels = [];
+                    const portfolioValues = [];
+                    const equityValues = [];
+                    
+                    for (let i = 11; i >= 0; i--) {
+                        const monthIndex = (currentMonth - i + 12) % 12;
+                        labels.push(months[monthIndex]);
+                        
+                        const monthlyAppreciation = Math.pow(1 + AppState.settings.appreciationRate / 100 / 12, 11 - i);
+                        const portfolioValue = properties.reduce((sum, p) => 
+                            sum + p.purchasePrice * monthlyAppreciation, 0);
+                        const equity = properties.reduce((sum, p) => {
+                            const loanBalance = calculateLoanBalance(p, 11 - i);
+                            return sum + (p.purchasePrice * monthlyAppreciation - loanBalance);
+                        }, 0);
+                        
+                        portfolioValues.push(portfolioValue);
+                        equityValues.push(equity);
+                    }
+                    
+                    AppState.charts.portfolio.data.labels = labels;
+                    AppState.charts.portfolio.data.datasets[0].data = portfolioValues;
+                    AppState.charts.portfolio.data.datasets[1].data = equityValues;
+                    AppState.charts.portfolio.update();
+                }
+                
+                if (AppState.charts.cashflow && properties.length > 0) {
+                    const labels = properties.map(p => p.address ? p.address.split(',')[0] : 'Property');
+                    const data = properties.map(p => p.monthlyCashFlow);
+                    
+                    AppState.charts.cashflow.data.labels = labels;
+                    AppState.charts.cashflow.data.datasets[0].data = data;
+                    AppState.charts.cashflow.update();
+                }
+                
+                if (AppState.charts.propertyType && properties.length > 0) {
+                    const typeCounts = {
+                        'single-family': 0,
+                        'multi-family': 0,
+                        'condo': 0,
+                        'commercial': 0
+                    };
+                    
+                    properties.forEach(p => {
+                        if (typeCounts.hasOwnProperty(p.propertyType)) {
+                            typeCounts[p.propertyType]++;
+                        }
+                    });
+                    
+                    AppState.charts.propertyType.data.datasets[0].data = Object.values(typeCounts);
+                    AppState.charts.propertyType.update();
+                }
+            } catch (error) {
+                console.error('Chart update error:', error);
+            }
+        }
+
+        function calculateLoanBalance(property, monthsPassed) {
+            try {
+                const principal = property.loanAmount || 0;
+                const rate = (property.interestRate || 0) / 100 / 12;
+                const totalPayments = (property.loanTerm || 30) * 12;
+                
+                if (rate === 0 || totalPayments === 0 || monthsPassed >= totalPayments) {
+                    return Math.max(0, principal - (monthsPassed * principal / totalPayments));
+                }
+                
+                const monthlyPayment = principal * (rate * Math.pow(1 + rate, totalPayments)) / 
+                    (Math.pow(1 + rate, totalPayments) - 1);
+                
+                const balance = principal * (Math.pow(1 + rate, totalPayments) - Math.pow(1 + rate, monthsPassed)) / 
+                    (Math.pow(1 + rate, totalPayments) - 1);
+                
+                return Math.max(0, balance);
+            } catch (error) {
+                console.error('Loan balance calculation error:', error);
+                return 0;
+            }
+        }
+
+        // ============================
+        // Property Analysis Functions
+        // ============================
+        function calculateAnalysis() {
+            try {
+                const property = gatherPropertyData();
+                
+                if (!property.purchasePrice || property.purchasePrice <= 0) {
+                    showNotification('Please enter a valid purchase price', 'warning');
+                    return;
+                }
+                
+                const analysis = performFinancialAnalysis(property);
+                
+                AppState.currentProperty = { ...property, ...analysis };
+                
+                // Update UI
+                displayAnalysisResults(analysis);
+                generateAIAnalysis(analysis);
+                updateProjectionChart(property, analysis);
+                
+                // Show summary tab
+                switchAnalyzerTab('summary');
+                
+                showNotification('Analysis completed successfully', 'success');
+            } catch (error) {
+                console.error('Analysis calculation error:', error);
+                showNotification('Error calculating analysis. Please check your inputs.', 'danger');
+            }
+        }
+
+        function gatherPropertyData() {
+            return {
+                address: getInputValue('address') || 'New Property',
+                propertyType: getInputValue('property-type'),
+                purchasePrice: parseFloat(getInputValue('purchase-price')) || 0,
+                bedrooms: parseInt(getInputValue('bedrooms')) || 0,
+                bathrooms: parseFloat(getInputValue('bathrooms')) || 0,
+                squareFeet: parseInt(getInputValue('square-feet')) || 0,
+                yearBuilt: parseInt(getInputValue('year-built')) || new Date().getFullYear(),
+                lotSize: parseInt(getInputValue('lot-size')) || 0,
+                units: parseInt(getInputValue('units')) || 1,
+                downPaymentPercent: parseFloat(getInputValue('down-payment-slider')) || 20,
+                interestRate: parseFloat(getInputValue('interest-rate')) || 6.5,
+                loanTerm: parseInt(getInputValue('loan-term')) || 30,
+                rentalIncome: parseFloat(getInputValue('rental-income')) || 0,
+                otherIncome: parseFloat(getInputValue('other-income')) || 0,
+                closingCosts: parseFloat(getInputValue('closing-costs')) || 0,
+                repairCosts: parseFloat(getInputValue('repair-costs')) || 0,
+                appreciationRate: parseFloat(getInputValue('appreciation-rate')) || 3,
+                rentIncreaseRate: parseFloat(getInputValue('rent-increase')) || 3,
+                propertyTax: parseFloat(getInputValue('property-tax')) || 0,
+                insurance: parseFloat(getInputValue('insurance')) || 0,
+                hoaFees: parseFloat(getInputValue('hoa-fees')) || 0,
+                maintenanceRate: parseFloat(getInputValue('maintenance-rate')) || 1,
+                vacancyRate: parseFloat(getInputValue('vacancy-rate')) || 8,
+                managementRate: parseFloat(getInputValue('management-rate')) || 8,
+                utilities: parseFloat(getInputValue('utilities')) || 0,
+                capexRate: parseFloat(getInputValue('capex-rate')) || 5,
+                otherExpenses: parseFloat(getInputValue('other-expenses')) || 0
+            };
+        }
+
+function getInputValue(id) {
+            const element = document.getElementById(id);
+            return element ? element.value : '';
+        }
+
+        function performFinancialAnalysis(property) {
+            try {
+                // Calculate loan details
+                const downPayment = property.purchasePrice * (property.downPaymentPercent / 100);
+                const loanAmount = property.purchasePrice - downPayment;
+                const monthlyRate = property.interestRate / 100 / 12;
+                const numPayments = property.loanTerm * 12;
+                
+                // Monthly payment calculation
+                const monthlyPayment = loanAmount > 0 && monthlyRate > 0 ? 
+                    loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                    (Math.pow(1 + monthlyRate, numPayments) - 1) : 0;
+                
+                // Calculate monthly income
+                const totalMonthlyIncome = property.rentalIncome + property.otherIncome;
+                const effectiveIncome = totalMonthlyIncome * (1 - property.vacancyRate / 100);
+                
+                // Calculate monthly expenses
+                const monthlyPropertyTax = property.propertyTax / 12;
+                const monthlyInsurance = property.insurance / 12;
+                const monthlyMaintenance = (property.purchasePrice * property.maintenanceRate / 100) / 12;
+                const monthlyCapex = (property.purchasePrice * property.capexRate / 100) / 12;
+                const monthlyManagement = effectiveIncome * (property.managementRate / 100);
+                
+                const totalMonthlyExpenses = monthlyPayment + monthlyPropertyTax + monthlyInsurance + 
+                    property.hoaFees + monthlyMaintenance + monthlyCapex + monthlyManagement + 
+                    property.utilities + property.otherExpenses;
+                
+                // Calculate key metrics
+                const monthlyCashFlow = effectiveIncome - totalMonthlyExpenses;
+                const annualCashFlow = monthlyCashFlow * 12;
+                
+                // NOI (Net Operating Income) - excludes debt service
+                const operatingExpenses = totalMonthlyExpenses - monthlyPayment;
+                const monthlyNOI = effectiveIncome - operatingExpenses;
+                const annualNOI = monthlyNOI * 12;
+                
+                // Cap Rate
+                const capRate = property.purchasePrice > 0 ? (annualNOI / property.purchasePrice) * 100 : 0;
+                
+                // Cash on Cash Return
+                const totalCashInvested = downPayment + property.closingCosts + property.repairCosts;
+                const cashOnCash = totalCashInvested > 0 ? (annualCashFlow / totalCashInvested) * 100 : 0;
+                
+                // ROI
+                const roi = totalCashInvested > 0 ? 
+                    ((annualCashFlow + (property.purchasePrice * property.appreciationRate / 100)) / totalCashInvested) * 100 : 0;
+                
+                // DSCR (Debt Service Coverage Ratio)
+                const annualDebtService = monthlyPayment * 12;
+                const dscr = annualDebtService > 0 ? annualNOI / annualDebtService : 0;
+                
+                // GRM (Gross Rent Multiplier)
+                const grm = totalMonthlyIncome > 0 ? property.purchasePrice / (totalMonthlyIncome * 12) : 0;
+                
+                // 1% Rule Check
+                const onePercentRule = totalMonthlyIncome >= property.purchasePrice * 0.01;
+                
+                // Calculate depreciation for tax purposes
+                const buildingValue = property.purchasePrice * 0.8; // Assume 80% building, 20% land
+                const annualDepreciation = buildingValue / 27.5; // Residential property depreciation
+                
+                return {
+                    downPayment,
+                    loanAmount,
+                    monthlyPayment,
+                    totalMonthlyIncome,
+                    effectiveIncome,
+                    totalMonthlyExpenses,
+                    monthlyCashFlow,
+                    annualCashFlow,
+                    monthlyNOI,
+                    annualNOI,
+                    capRate,
+                    cashOnCash,
+                    roi,
+                    dscr,
+                    grm,
+                    onePercentRule,
+                    annualDepreciation,
+                    totalCashInvested,
+                    // Additional metrics for AI scoring
+                    rentToValue: (totalMonthlyIncome / property.purchasePrice) * 100,
+                    expenseRatio: (operatingExpenses / effectiveIncome) * 100,
+                    netIncome: annualCashFlow - (annualCashFlow * AppState.settings.taxRate / 100) + annualDepreciation
+                };
+            } catch (error) {
+                console.error('Financial analysis error:', error);
+                return {};
+            }
+        }
+
+        function displayAnalysisResults(analysis) {
+            // Update metric cards
+            updateElementText('monthly-cashflow', '$' + analysis.monthlyCashFlow.toFixed(0).toLocaleString());
+            updateElementText('cap-rate', analysis.capRate.toFixed(2) + '%');
+            updateElementText('cash-on-cash', analysis.cashOnCash.toFixed(2) + '%');
+            
+            // Calculate and display AI score
+            const aiScore = calculateAIScore(analysis);
+            updateElementText('ai-score', aiScore);
+            
+            const scoreBadge = document.getElementById('ai-score-badge');
+            if (scoreBadge) {
+                if (aiScore >= 80) {
+                    scoreBadge.className = 'ai-score excellent';
+                    scoreBadge.textContent = 'Excellent Deal';
+                } else if (aiScore >= 60) {
+                    scoreBadge.className = 'ai-score good';
+                    scoreBadge.textContent = 'Good Deal';
+                } else if (aiScore >= 40) {
+                    scoreBadge.className = 'ai-score fair';
+                    scoreBadge.textContent = 'Fair Deal';
+                } else {
+                    scoreBadge.className = 'ai-score poor';
+                    scoreBadge.textContent = 'Poor Deal';
+                }
+            }
+        }
+
+        function calculateAIScore(analysis) {
+            let score = 0;
+            
+            // Cash Flow Score (25 points)
+            if (analysis.monthlyCashFlow > 500) score += 25;
+            else if (analysis.monthlyCashFlow > 250) score += 20;
+            else if (analysis.monthlyCashFlow > 100) score += 15;
+            else if (analysis.monthlyCashFlow > 0) score += 10;
+            else score += 0;
+            
+            // Cap Rate Score (25 points)
+            if (analysis.capRate > 10) score += 25;
+            else if (analysis.capRate > 8) score += 20;
+            else if (analysis.capRate > 6) score += 15;
+            else if (analysis.capRate > 4) score += 10;
+            else score += 5;
+            
+            // Cash on Cash Return Score (25 points)
+            if (analysis.cashOnCash > 12) score += 25;
+            else if (analysis.cashOnCash > 10) score += 20;
+            else if (analysis.cashOnCash > 8) score += 15;
+            else if (analysis.cashOnCash > 6) score += 10;
+            else score += 5;
+            
+            // DSCR Score (15 points)
+            if (analysis.dscr > 1.5) score += 15;
+            else if (analysis.dscr > 1.25) score += 12;
+            else if (analysis.dscr > 1.0) score += 8;
+            else score += 0;
+            
+            // 1% Rule Score (10 points)
+            if (analysis.onePercentRule) score += 10;
+            else if (analysis.rentToValue > 0.8) score += 7;
+            else if (analysis.rentToValue > 0.6) score += 5;
+            
+            return Math.min(100, Math.round(score));
+        }
+
+        function generateAIAnalysis(analysis) {
+            const aiAnalysisDiv = document.getElementById('ai-analysis');
+            if (!aiAnalysisDiv) return;
+            
+            // Generate risks and opportunities based on metrics
+            const risks = [];
+            const opportunities = [];
+            
+            // Analyze risks
+            if (analysis.monthlyCashFlow < 100) {
+                risks.push('Low monthly cash flow may limit financial flexibility');
+            }
+            if (analysis.capRate < 6) {
+                risks.push('Below-market cap rate suggests potential overvaluation');
+            }
+            if (analysis.dscr < 1.2) {
+                risks.push('Low debt service coverage ratio indicates tight margins');
+            }
+            if (analysis.expenseRatio > 50) {
+                risks.push('High expense ratio may impact profitability');
+            }
+            if (!analysis.onePercentRule) {
+                risks.push('Property fails 1% rule - rental income may be insufficient');
+            }
+            
+            // Analyze opportunities
+            if (analysis.cashOnCash > 10) {
+                opportunities.push('Strong cash-on-cash return exceeds market averages');
+            }
+            if (analysis.capRate > 8) {
+                opportunities.push('Excellent cap rate suggests strong income potential');
+            }
+            if (analysis.roi > 15) {
+                opportunities.push('High ROI indicates exceptional investment opportunity');
+            }
+            if (analysis.rentToValue > 1) {
+                opportunities.push('Property meets 1% rule - strong rental income relative to price');
+            }
+            if (AppState.currentProperty && AppState.currentProperty.squareFeet > 0) {
+                const pricePerSqFt = AppState.currentProperty.purchasePrice / AppState.currentProperty.squareFeet;
+                if (pricePerSqFt < 150) {
+                    opportunities.push('Low price per square foot may indicate value-add potential');
+                }
+            }
+            
+            // Build HTML
+            let html = '<div class="ai-analysis-content">';
+            
+            if (risks.length > 0) {
+                html += '<div class="alert alert-warning" style="margin-bottom: var(--spacing-md);">';
+                html += '<div class="alert-icon">⚠️</div>';
+                html += '<div class="alert-content">';
+                html += '<div class="alert-title">Potential Risks</div>';
+                html += '<ul style="margin: var(--spacing-xs) 0; padding-left: var(--spacing-lg);">';
+                risks.forEach(risk => {
+                    html += `<li style="margin-bottom: var(--spacing-xs);">${risk}</li>`;
+                });
+                html += '</ul></div></div>';
+            }
+            
+            if (opportunities.length > 0) {
+                html += '<div class="alert alert-success">';
+                html += '<div class="alert-icon">✨</div>';
+                html += '<div class="alert-content">';
+                html += '<div class="alert-title">Potential Opportunities</div>';
+                html += '<ul style="margin: var(--spacing-xs) 0; padding-left: var(--spacing-lg);">';
+                opportunities.forEach(opp => {
+                    html += `<li style="margin-bottom: var(--spacing-xs);">${opp}</li>`;
+                });
+                html += '</ul></div></div>';
+            }
+            
+            html += '</div>';
+            
+            aiAnalysisDiv.innerHTML = html;
+        }
+
+        function updateProjectionChart(property, analysis) {
+            if (!AppState.charts.projection) return;
+            
+            try {
+                const years = [];
+                const propertyValues = [];
+                const loanBalances = [];
+                const equityValues = [];
+                
+                let currentValue = property.purchasePrice;
+                let currentLoanBalance = analysis.loanAmount;
+                
+                for (let year = 0; year <= 30; year++) {
+                    years.push(year);
+                    
+                    // Calculate property value with appreciation
+                    currentValue = property.purchasePrice * Math.pow(1 + property.appreciationRate / 100, year);
+                    propertyValues.push(currentValue);
+                    
+                    // Calculate remaining loan balance
+                    if (year === 0) {
+                        loanBalances.push(currentLoanBalance);
+                    } else {
+                        const monthsPassed = year * 12;
+                        const monthlyRate = property.interestRate / 100 / 12;
+                        const totalPayments = property.loanTerm * 12;
+                        
+                        if (monthsPassed < totalPayments && monthlyRate > 0) {
+                            const remainingPayments = totalPayments - monthsPassed;
+                            currentLoanBalance = analysis.loanAmount * 
+                                (Math.pow(1 + monthlyRate, remainingPayments) - 1) / 
+                                (Math.pow(1 + monthlyRate, totalPayments) - 1);
+                            loanBalances.push(Math.max(0, currentLoanBalance));
+                        } else {
+                            loanBalances.push(0);
+                        }
+                    }
+                    
+                    // Calculate equity
+                    equityValues.push(propertyValues[year] - loanBalances[year]);
+                }
+                
+                AppState.charts.projection.data.labels = years;
+                AppState.charts.projection.data.datasets[0].data = propertyValues;
+                AppState.charts.projection.data.datasets[1].data = loanBalances;
+                AppState.charts.projection.data.datasets[2].data = equityValues;
+                AppState.charts.projection.update();
+            } catch (error) {
+                console.error('Projection chart update error:', error);
+            }
+        }
+
+        // ============================
+        // URL Parsing Functions
+        // ============================
+        function parseListingURL() {
+            const url = getInputValue('listing-url');
+            if (!url) {
+                showNotification('Please enter a property listing URL', 'warning');
+                return;
+            }
+            
+            // Simulate parsing (in production, this would call an API or scraping service)
+            if (url.includes('zillow.com') || url.includes('redfin.com')) {
+                // Extract address from URL (simplified)
+                const addressMatch = url.match(/(\d+[-\w\s]+)/);
+                if (addressMatch) {
+                    setInputValue('address', addressMatch[1]);
+                }
+                
+                // Set some realistic defaults based on "parsed" data
+                setInputValue('purchase-price', 450000);
+                setInputValue('bedrooms', 3);
+                setInputValue('bathrooms', 2);
+                setInputValue('square-feet', 1850);
+                setInputValue('year-built', 2005);
+                setInputValue('lot-size', 6500);
+                setInputValue('property-tax', 5400);
+                setInputValue('insurance', 1200);
+                setInputValue('rental-income', 3200);
+                
+                showNotification('Property data imported successfully. Please review and adjust as needed.', 'success');
+            } else {
+                showNotification('Please enter a valid Zillow or Redfin URL', 'warning');
+            }
+        }
+
+        function setInputValue(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = value;
+            }
+        }
+
+        // ============================
+        // Portfolio Functions
+        // ============================
+        function renderPortfolio() {
+            const portfolioContent = document.getElementById('portfolio-content');
+            if (!portfolioContent) return;
+            
+            if (AppState.properties.length === 0) {
+                portfolioContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🏘️</div>
+                        <div class="empty-state-title">No Properties Yet</div>
+                        <div class="empty-state-description">
+                            Add properties from the analyzer or import your portfolio
+                        </div>
+                        <button class="btn btn-primary" onclick="switchTool('analyzer')">
+                            Analyze First Property
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort properties by ROI
+            const sortedProperties = [...AppState.properties].sort((a, b) => b.roi - a.roi);
+            
+            let html = '<div class="property-grid">';
+            
+            sortedProperties.forEach((property, index) => {
+                const aiScore = calculateAIScore(property);
+                let scoreClass = 'poor';
+                if (aiScore >= 80) scoreClass = 'excellent';
+                else if (aiScore >= 60) scoreClass = 'good';
+                else if (aiScore >= 40) scoreClass = 'fair';
+                
+                html += `
+                    <div class="property-card">
+                        <div class="property-card-header">
+                            <div class="property-card-title">${property.address}</div>
+                            <div class="property-card-subtitle">
+                                <span class="ai-score ${scoreClass}">Score: ${aiScore}</span>
+                            </div>
+                        </div>
+                        <div class="property-card-body">
+                            <div class="property-metric">
+                                <span class="property-metric-label">Purchase Price</span>
+                                <span class="property-metric-value">$${property.purchasePrice.toLocaleString()}</span>
+                            </div>
+                            <div class="property-metric">
+                                <span class="property-metric-label">Monthly Cash Flow</span>
+                                <span class="property-metric-value" style="color: ${property.monthlyCashFlow >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                                    $${property.monthlyCashFlow.toFixed(0).toLocaleString()}
+                                </span>
+                            </div>
+                            <div class="property-metric">
+                                <span class="property-metric-label">Cap Rate</span>
+                                <span class="property-metric-value">${property.capRate.toFixed(2)}%</span>
+                            </div>
+                            <div class="property-metric">
+                                <span class="property-metric-label">ROI</span>
+                                <span class="property-metric-value">${property.roi.toFixed(2)}%</span>
+                            </div>
+                            <div class="btn-group" style="margin-top: var(--spacing-md);">
+                                <button class="btn btn-secondary btn-sm" onclick="viewProperty(${index})">View Details</button>
+                                <button class="btn btn-danger btn-sm" onclick="removeProperty(${index})">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            // Add summary table
+            html += `
+                <div class="card" style="margin-top: var(--spacing-xl);">
+                    <div class="card-header">
+                        <h3 class="card-title">Portfolio Comparison</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Purchase Price</th>
+                                        <th>Monthly Income</th>
+                                        <th>Cash Flow</th>
+                                        <th>Cap Rate</th>
+                                        <th>ROI</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+            `;
+            
+            sortedProperties.forEach(property => {
+                const aiScore = calculateAIScore(property);
+                html += `
+                    <tr>
+                        <td>${property.address}</td>
+                        <td>$${property.purchasePrice.toLocaleString()}</td>
+                        <td>$${property.totalMonthlyIncome.toLocaleString()}</td>
+                        <td style="color: ${property.monthlyCashFlow >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                            $${property.monthlyCashFlow.toFixed(0).toLocaleString()}
+                        </td>
+                        <td>${property.capRate.toFixed(2)}%</td>
+                        <td>${property.roi.toFixed(2)}%</td>
+                        <td>${aiScore}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            portfolioContent.innerHTML = html;
+        }
+
+        function addPropertyToPortfolio() {
+            if (!AppState.currentProperty) {
+                showNotification('Please analyze a property first', 'warning');
+                switchTool('analyzer');
+                return;
+            }
+            
+            AppState.properties.push({...AppState.currentProperty});
+            saveProperties();
+            updateDashboard();
+            renderPortfolio();
+            
+            showNotification('Property added to portfolio successfully', 'success');
+        }
+
+        function viewProperty(index) {
+            const property = AppState.properties[index];
+            if (!property) return;
+            
+            // Load property data into analyzer
+            setInputValue('address', property.address);
+            setInputValue('property-type', property.propertyType);
+            setInputValue('purchase-price', property.purchasePrice);
+            setInputValue('bedrooms', property.bedrooms);
+            setInputValue('bathrooms', property.bathrooms);
+            setInputValue('square-feet', property.squareFeet);
+            setInputValue('year-built', property.yearBuilt);
+            setInputValue('lot-size', property.lotSize);
+            setInputValue('units', property.units);
+            setInputValue('down-payment-slider', property.downPaymentPercent);
+            setInputValue('interest-rate', property.interestRate);
+            setInputValue('loan-term', property.loanTerm);
+            setInputValue('rental-income', property.rentalIncome);
+            setInputValue('other-income', property.otherIncome);
+            setInputValue('closing-costs', property.closingCosts);
+            setInputValue('repair-costs', property.repairCosts);
+            setInputValue('appreciation-rate', property.appreciationRate);
+            setInputValue('rent-increase', property.rentIncreaseRate);
+            setInputValue('property-tax', property.propertyTax);
+            setInputValue('insurance', property.insurance);
+            setInputValue('hoa-fees', property.hoaFees);
+            setInputValue('maintenance-rate', property.maintenanceRate);
+            setInputValue('vacancy-rate', property.vacancyRate);
+            setInputValue('management-rate', property.managementRate);
+            setInputValue('utilities', property.utilities);
+            setInputValue('capex-rate', property.capexRate);
+            setInputValue('other-expenses', property.otherExpenses);
+            
+            // Switch to analyzer and calculate
+            switchTool('analyzer');
+            calculateAnalysis();
+        }
+
+        function removeProperty(index) {
+            if (confirm('Are you sure you want to remove this property?')) {
+                AppState.properties.splice(index, 1);
+                saveProperties();
+                updateDashboard();
+                renderPortfolio();
+                showNotification('Property removed from portfolio', 'success');
+            }
+        }
+
+        // ============================
+        // Scenario Analysis Functions
+        // ============================
+        function initializeScenarios() {
+            if (!AppState.currentProperty) {
+                showNotification('Please analyze a property first to use scenario analysis', 'warning');
+                return;
+            }
+            
+            AppState.baseScenario = { ...AppState.currentProperty };
+            updateScenarioTable();
+        }
+
+        function updateScenarios() {
+            if (!AppState.currentProperty) return;
+            
+            try {
+                // Get scenario adjustments
+                const interestChange = parseFloat(getInputValue('scenario-interest')) || 0;
+                const vacancyChange = parseFloat(getInputValue('scenario-vacancy')) || 0;
+                const rentChange = parseFloat(getInputValue('scenario-rent')) || 0;
+                
+                // Update range displays
+                updateElementText('scenario-interest-value', interestChange + '%');
+                updateElementText('scenario-vacancy-value', vacancyChange + '%');
+                updateElementText('scenario-rent-value', rentChange + '%');
+                
+                // Create scenario property
+                const scenarioProperty = { ...AppState.currentProperty };
+                scenarioProperty.interestRate += interestChange;
+                scenarioProperty.vacancyRate += vacancyChange;
+                scenarioProperty.rentalIncome *= (1 + rentChange / 100);
+                
+                // Recalculate with scenario values
+                const scenarioAnalysis = performFinancialAnalysis(scenarioProperty);
+                
+                // Update scenario table
+                updateScenarioTable(scenarioAnalysis);
+                updateScenarioChart(scenarioAnalysis);
+            } catch (error) {
+                console.error('Scenario update error:', error);
+            }
+        }
+
+        function updateScenarioTable(scenarioAnalysis = null) {
+            if (!AppState.currentProperty) return;
+            
+            // Update base case
+            updateElementText('base-cashflow', '$' + AppState.currentProperty.monthlyCashFlow.toFixed(0).toLocaleString());
+            updateElementText('base-roi', AppState.currentProperty.roi.toFixed(2) + '%');
+            updateElementText('base-cap', AppState.currentProperty.capRate.toFixed(2) + '%');
+            
+            if (scenarioAnalysis) {
+                // Update scenario case
+                updateElementText('scenario-cashflow', '$' + scenarioAnalysis.monthlyCashFlow.toFixed(0).toLocaleString());
+                updateElementText('scenario-roi', scenarioAnalysis.roi.toFixed(2) + '%');
+                updateElementText('scenario-cap', scenarioAnalysis.capRate.toFixed(2) + '%');
+                
+                // Calculate impact
+                const cashflowImpact = ((scenarioAnalysis.monthlyCashFlow - AppState.currentProperty.monthlyCashFlow) / AppState.currentProperty.monthlyCashFlow * 100);
+                const impactText = cashflowImpact >= 0 ? 
+                    `+${cashflowImpact.toFixed(1)}%` : 
+                    `${cashflowImpact.toFixed(1)}%`;
+                updateElementText('scenario-impact', impactText);
+            }
+        }
+
+        function updateScenarioChart(scenarioAnalysis) {
+            if (!AppState.charts.scenario || !AppState.currentProperty || !scenarioAnalysis) return;
+            
+            try {
+                const baseData = [
+                    Math.min(100, (AppState.currentProperty.monthlyCashFlow + 1000) / 20),
+                    Math.min(100, AppState.currentProperty.roi * 5),
+                    Math.min(100, AppState.currentProperty.capRate * 10),
+                    Math.min(100, 100 - (AppState.currentProperty.expenseRatio || 50)),
+                    Math.min(100, calculateAIScore(AppState.currentProperty))
+                ];
+                
+                const scenarioData = [
+                    Math.min(100, (scenarioAnalysis.monthlyCashFlow + 1000) / 20),
+                    Math.min(100, scenarioAnalysis.roi * 5),
+                    Math.min(100, scenarioAnalysis.capRate * 10),
+                    Math.min(100, 100 - (scenarioAnalysis.expenseRatio || 50)),
+                    Math.min(100, calculateAIScore(scenarioAnalysis))
+                ];
+                
+                AppState.charts.scenario.data.datasets[0].data = baseData;
+                AppState.charts.scenario.data.datasets[1].data = scenarioData;
+                AppState.charts.scenario.update();
+            } catch (error) {
+                console.error('Scenario chart update error:', error);
+            }
+        }
+
+        // ============================
+        // Report Generation Functions
+        // ============================
+        function generateReport(type) {
+            try {
+                if (typeof jsPDF === 'undefined') {
+                    showNotification('PDF library not loaded. Please refresh the page.', 'warning');
+                    return;
+                }
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Add header
+                doc.setFontSize(20);
+                doc.text('REI Pro Suite Report', 20, 20);
+                doc.setFontSize(12);
+                doc.text('Generated on: ' + new Date().toLocaleDateString(), 20, 30);
+                
+                let yPosition = 50;
+                
+                if (type === 'portfolio') {
+                    generatePortfolioReport(doc, yPosition);
+                } else if (type === 'property') {
+                    generatePropertyReport(doc, yPosition);
+                } else if (type === 'tax') {
+                    generateTaxReport(doc, yPosition);
+                }
+                
+                // Save the PDF
+                const fileName = `REI_${type}_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+                showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} report generated successfully`, 'success');
+            } catch (error) {
+                console.error('Report generation error:', error);
+                showNotification('Error generating report. Please try again.', 'danger');
+            }
+        }
+
+        function generatePortfolioReport(doc, startY) {
+            let y = startY;
+            
+            doc.setFontSize(16);
+            doc.text('Portfolio Summary', 20, y);
+            y += 15;
+            
+            doc.setFontSize(12);
+            const properties = AppState.properties;
+            const totalValue = properties.reduce((sum, p) => sum + p.purchasePrice, 0);
+            const totalCashflow = properties.reduce((sum, p) => sum + p.monthlyCashFlow, 0);
+            const avgROI = properties.length > 0 ? 
+                properties.reduce((sum, p) => sum + p.roi, 0) / properties.length : 0;
+            
+            doc.text(`Total Properties: ${properties.length}`, 20, y);
+            y += 10;
+            doc.text(`Total Portfolio Value: $${totalValue.toLocaleString()}`, 20, y);
+            y += 10;
+            doc.text(`Total Monthly Cash Flow: $${totalCashflow.toFixed(0).toLocaleString()}`, 20, y);
+            y += 10;
+            doc.text(`Average ROI: ${avgROI.toFixed(2)}%`, 20, y);
+            y += 20;
+          // Property details
+            doc.setFontSize(14);
+            doc.text('Property Details', 20, y);
+            y += 15;
+            
+            properties.forEach((property, index) => {
+                if (y > 250) {
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                doc.setFontSize(12);
+                doc.text(`${index + 1}. ${property.address}`, 20, y);
+                y += 8;
+                doc.text(`   Purchase Price: $${property.purchasePrice.toLocaleString()}`, 25, y);
+                y += 6;
+                doc.text(`   Monthly Cash Flow: $${property.monthlyCashFlow.toFixed(0).toLocaleString()}`, 25, y);
+                y += 6;
+                doc.text(`   Cap Rate: ${property.capRate.toFixed(2)}%`, 25, y);
+                y += 6;
+                doc.text(`   ROI: ${property.roi.toFixed(2)}%`, 25, y);
+                y += 6;
+                doc.text(`   AI Score: ${calculateAIScore(property)}`, 25, y);
+                y += 12;
+            });
+        }
+
+        function generatePropertyReport(doc, startY) {
+            if (!AppState.currentProperty) {
+                doc.text('No property analyzed. Please analyze a property first.', 20, startY);
+                return;
+            }
+            
+            let y = startY;
+            const property = AppState.currentProperty;
+            
+            doc.setFontSize(16);
+            doc.text('Property Analysis Report', 20, y);
+            y += 15;
+            
+            doc.setFontSize(14);
+            doc.text('Property Information', 20, y);
+            y += 10;
+            
+            doc.setFontSize(12);
+            doc.text(`Address: ${property.address}`, 20, y);
+            y += 8;
+            doc.text(`Property Type: ${property.propertyType}`, 20, y);
+            y += 8;
+            doc.text(`Purchase Price: $${property.purchasePrice.toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Bedrooms: ${property.bedrooms}`, 20, y);
+            y += 8;
+            doc.text(`Bathrooms: ${property.bathrooms}`, 20, y);
+            y += 8;
+            doc.text(`Square Feet: ${property.squareFeet.toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Year Built: ${property.yearBuilt}`, 20, y);
+            y += 15;
+            
+            doc.setFontSize(14);
+            doc.text('Financial Analysis', 20, y);
+            y += 10;
+            
+            doc.setFontSize(12);
+            doc.text(`Down Payment: $${property.downPayment.toLocaleString()} (${property.downPaymentPercent}%)`, 20, y);
+            y += 8;
+            doc.text(`Loan Amount: $${property.loanAmount.toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Monthly Payment: $${property.monthlyPayment.toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Monthly Rental Income: $${property.totalMonthlyIncome.toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Monthly Cash Flow: $${property.monthlyCashFlow.toFixed(0).toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Annual Cash Flow: $${property.annualCashFlow.toFixed(0).toLocaleString()}`, 20, y);
+            y += 15;
+            
+            doc.setFontSize(14);
+            doc.text('Key Metrics', 20, y);
+            y += 10;
+            
+            doc.setFontSize(12);
+            doc.text(`Cap Rate: ${property.capRate.toFixed(2)}%`, 20, y);
+            y += 8;
+            doc.text(`Cash on Cash Return: ${property.cashOnCash.toFixed(2)}%`, 20, y);
+            y += 8;
+            doc.text(`Return on Investment: ${property.roi.toFixed(2)}%`, 20, y);
+            y += 8;
+            doc.text(`Debt Service Coverage Ratio: ${property.dscr.toFixed(2)}`, 20, y);
+            y += 8;
+            doc.text(`1% Rule: ${property.onePercentRule ? 'Passes' : 'Fails'}`, 20, y);
+            y += 8;
+            doc.text(`AI Deal Score: ${calculateAIScore(property)}/100`, 20, y);
+            y += 15;
+            
+            doc.setFontSize(14);
+            doc.text('Investment Summary', 20, y);
+            y += 10;
+            
+            doc.setFontSize(12);
+            doc.text(`Total Cash Invested: $${property.totalCashInvested.toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Annual Depreciation: $${property.annualDepreciation.toFixed(0).toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Net Operating Income: $${property.annualNOI.toFixed(0).toLocaleString()}`, 20, y);
+        }
+
+        function generateTaxReport(doc, startY) {
+            if (AppState.properties.length === 0) {
+                doc.text('No properties in portfolio. Please add properties first.', 20, startY);
+                return;
+            }
+            
+            let y = startY;
+            
+            doc.setFontSize(16);
+            doc.text('Tax Report', 20, y);
+            y += 15;
+            
+            doc.setFontSize(14);
+            doc.text('Annual Tax Summary', 20, y);
+            y += 10;
+            
+            let totalDepreciation = 0;
+            let totalRentalIncome = 0;
+            let totalExpenses = 0;
+            let totalNetIncome = 0;
+            
+            AppState.properties.forEach((property, index) => {
+                const annualRental = property.totalMonthlyIncome * 12;
+                const annualExpenses = property.totalMonthlyExpenses * 12;
+                const netIncome = annualRental - annualExpenses;
+                
+                totalDepreciation += property.annualDepreciation || 0;
+                totalRentalIncome += annualRental;
+                totalExpenses += annualExpenses;
+                totalNetIncome += netIncome;
+                
+                if (y > 240) {
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                doc.setFontSize(12);
+                doc.text(`Property ${index + 1}: ${property.address}`, 20, y);
+                y += 8;
+                doc.text(`  Annual Rental Income: $${annualRental.toFixed(0).toLocaleString()}`, 25, y);
+                y += 6;
+                doc.text(`  Annual Expenses: $${annualExpenses.toFixed(0).toLocaleString()}`, 25, y);
+                y += 6;
+                doc.text(`  Net Income: $${netIncome.toFixed(0).toLocaleString()}`, 25, y);
+                y += 6;
+                doc.text(`  Annual Depreciation: $${(property.annualDepreciation || 0).toFixed(0).toLocaleString()}`, 25, y);
+                y += 10;
+            });
+            
+            y += 10;
+            doc.setFontSize(14);
+            doc.text('Portfolio Totals', 20, y);
+            y += 10;
+            
+            doc.setFontSize(12);
+            doc.text(`Total Rental Income: $${totalRentalIncome.toFixed(0).toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Total Expenses: $${totalExpenses.toFixed(0).toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Total Net Income: $${totalNetIncome.toFixed(0).toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Total Depreciation: $${totalDepreciation.toFixed(0).toLocaleString()}`, 20, y);
+            y += 8;
+            doc.text(`Taxable Income: $${(totalNetIncome - totalDepreciation).toFixed(0).toLocaleString()}`, 20, y);
+        }
+
+        // ============================
+        // Import/Export Functions
+        // ============================
+        function importData() {
+            const fileInput = document.getElementById('file-input');
+            if (fileInput) {
+                fileInput.click();
+            }
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            try {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        if (file.name.endsWith('.json')) {
+                            const data = JSON.parse(e.target.result);
+                            if (data.properties && Array.isArray(data.properties)) {
+                                AppState.properties = data.properties;
+                                if (data.settings) {
+                                    AppState.settings = { ...AppState.settings, ...data.settings };
+                                }
+                                saveProperties();
+                                saveSettings();
+                                updateDashboard();
+                                renderPortfolio();
+                                showNotification(`Imported ${data.properties.length} properties successfully`, 'success');
+                            } else {
+                                showNotification('Invalid file format. Please select a valid REI Pro Suite export file.', 'danger');
+                            }
+                        } else if (file.name.endsWith('.csv')) {
+                            handleCSVImport(e.target.result);
+                        } else {
+                            showNotification('Unsupported file format. Please select a JSON or CSV file.', 'warning');
+                        }
+                    } catch (error) {
+                        console.error('File import error:', error);
+                        showNotification('Error importing file. Please check the file format.', 'danger');
+                    }
+                };
+                reader.readAsText(file);
+            } catch (error) {
+                console.error('File reading error:', error);
+                showNotification('Error reading file. Please try again.', 'danger');
+            }
+        }
+
+        function handleCSVImport(csvText) {
+            try {
+                if (typeof Papa === 'undefined') {
+                    showNotification('CSV parser not loaded. Please refresh the page.', 'warning');
+                    return;
+                }
+                
+                const results = Papa.parse(csvText, {
+                    header: true,
+                    dynamicTyping: true,
+                    skipEmptyLines: true
+                });
+                
+                if (results.errors.length > 0) {
+                    console.warn('CSV parsing warnings:', results.errors);
+                }
+                
+                const importedProperties = results.data.map(row => ({
+                    address: row.address || 'Imported Property',
+                    propertyType: row.propertyType || 'single-family',
+                    purchasePrice: parseFloat(row.purchasePrice) || 0,
+                    bedrooms: parseInt(row.bedrooms) || 0,
+                    bathrooms: parseFloat(row.bathrooms) || 0,
+                    squareFeet: parseInt(row.squareFeet) || 0,
+                    yearBuilt: parseInt(row.yearBuilt) || new Date().getFullYear(),
+                    lotSize: parseInt(row.lotSize) || 0,
+                    units: parseInt(row.units) || 1,
+                    downPaymentPercent: parseFloat(row.downPaymentPercent) || 20,
+                    interestRate: parseFloat(row.interestRate) || 6.5,
+                    loanTerm: parseInt(row.loanTerm) || 30,
+                    rentalIncome: parseFloat(row.rentalIncome) || 0,
+                    otherIncome: parseFloat(row.otherIncome) || 0,
+                    closingCosts: parseFloat(row.closingCosts) || 0,
+                    repairCosts: parseFloat(row.repairCosts) || 0,
+                    appreciationRate: parseFloat(row.appreciationRate) || 3,
+                    rentIncreaseRate: parseFloat(row.rentIncreaseRate) || 3,
+                    propertyTax: parseFloat(row.propertyTax) || 0,
+                    insurance: parseFloat(row.insurance) || 0,
+                    hoaFees: parseFloat(row.hoaFees) || 0,
+                    maintenanceRate: parseFloat(row.maintenanceRate) || 1,
+                    vacancyRate: parseFloat(row.vacancyRate) || 8,
+                    managementRate: parseFloat(row.managementRate) || 8,
+                    utilities: parseFloat(row.utilities) || 0,
+                    capexRate: parseFloat(row.capexRate) || 5,
+                    otherExpenses: parseFloat(row.otherExpenses) || 0
+                })).filter(property => property.purchasePrice > 0);
+                
+                // Perform analysis on each imported property
+                const analyzedProperties = importedProperties.map(property => {
+                    const analysis = performFinancialAnalysis(property);
+                    return { ...property, ...analysis };
+                });
+                
+                AppState.properties.push(...analyzedProperties);
+                saveProperties();
+                updateDashboard();
+                renderPortfolio();
+                
+                showNotification(`Imported ${analyzedProperties.length} properties from CSV`, 'success');
+            } catch (error) {
+                console.error('CSV import error:', error);
+                showNotification('Error importing CSV file. Please check the format.', 'danger');
+            }
+        }
+
+        function exportData() {
+            try {
+                const exportData = {
+                    properties: AppState.properties,
+                    settings: AppState.settings,
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+                
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `REI_Portfolio_Export_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showNotification('Portfolio exported successfully', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showNotification('Error exporting data. Please try again.', 'danger');
+            }
+        }
+
+        // ============================
+        // Settings Functions
+        // ============================
+        function showSettings() {
+            const modal = document.getElementById('settings-modal');
+            if (modal) {
+                modal.classList.add('active');
+                
+                // Load current settings
+                setInputValue('default-interest', AppState.settings.interestRate);
+                setInputValue('default-down', AppState.settings.downPayment);
+                setInputValue('default-vacancy', AppState.settings.vacancyRate);
+                setInputValue('default-management', AppState.settings.managementFee);
+                setInputValue('tax-rate', AppState.settings.taxRate);
+            }
+        }
+
+        function closeSettings() {
+            const modal = document.getElementById('settings-modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        function saveSettings() {
+            try {
+                AppState.settings.interestRate = parseFloat(getInputValue('default-interest')) || 6.5;
+                AppState.settings.downPayment = parseFloat(getInputValue('default-down')) || 20;
+                AppState.settings.vacancyRate = parseFloat(getInputValue('default-vacancy')) || 8;
+                AppState.settings.managementFee = parseFloat(getInputValue('default-management')) || 8;
+                AppState.settings.taxRate = parseFloat(getInputValue('tax-rate')) || 24;
+                
+                localStorage.setItem('reiProSuiteSettings', JSON.stringify(AppState.settings));
+                
+                closeSettings();
+                showNotification('Settings saved successfully', 'success');
+            } catch (error) {
+                console.error('Settings save error:', error);
+                showNotification('Error saving settings. Please try again.', 'danger');
+            }
+        }
+
+        function loadSettings() {
+            try {
+                const savedSettings = localStorage.getItem('reiProSuiteSettings');
+                if (savedSettings) {
+                    const settings = JSON.parse(savedSettings);
+                    AppState.settings = { ...AppState.settings, ...settings };
+                }
+            } catch (error) {
+                console.error('Settings load error:', error);
+            }
+        }
+
+        function saveProperties() {
+            try {
+                localStorage.setItem('reiProSuiteProperties', JSON.stringify(AppState.properties));
+            } catch (error) {
+                console.error('Properties save error:', error);
+            }
+        }
+
+        function loadProperties() {
+            try {
+                const savedProperties = localStorage.getItem('reiProSuiteProperties');
+                if (savedProperties) {
+                    AppState.properties = JSON.parse(savedProperties);
+                }
+            } catch (error) {
+                console.error('Properties load error:', error);
+                AppState.properties = [];
+            }
+        }
+
+        // ============================
+        // Utility Functions
+        // ============================
+        function updateRangeValue(type, value) {
+            const valueSpan = document.getElementById(type + '-value');
+            if (valueSpan) {
+                valueSpan.textContent = value + '%';
+            }
+        }
+
+        // ============================
+        // Error Handling
+        // ============================
+        window.addEventListener('error', function(e) {
+            console.error('Application error:', e);
+            if (e.message && !e.message.includes('Script error')) {
+                showNotification('An error occurred. Please refresh the page.', 'danger');
+            }
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e);
+            if (e.reason && e.reason.message) {
+                showNotification('An error occurred. Please try again.', 'danger');
+            }
+        });
+
+        // ============================
+        // Make Functions Available Globally
+        // ============================
+        window.switchTool = switchTool;
+        window.switchAnalyzerTab = switchAnalyzerTab;
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.calculateAnalysis = calculateAnalysis;
+        window.parseListingURL = parseListingURL;
+        window.addPropertyToPortfolio = addPropertyToPortfolio;
+        window.viewProperty = viewProperty;
+        window.removeProperty = removeProperty;
+        window.updateScenarios = updateScenarios;
+        window.generateReport = generateReport;
+        window.importData = importData;
+        window.exportData = exportData;
+        window.showSettings = showSettings;
+        window.closeSettings = closeSettings;
+        window.saveSettings = saveSettings;
+        window.updateRangeValue = updateRangeValue;
+        window.updateDashboardChart = updateDashboardChart;
+        window.initializeScenarios = initializeScenarios;
+        
+        // ============================
+        // Initialize on Load
+        // ============================
+        console.log('REI Pro Suite loaded successfully');
+    </script>
+</body>
+</html>  

@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Property Investment Analyzer</title>
+    <!-- Include Papa Parse library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <style>
+        /* Embedded CSS for styling */
+
+        /* Basic Reset */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+
+        /* Header Styling */
+
+        header {
+            background-color: #1b8415;
+            color: #ffff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        header .header-actions {
+            margin-top: 10px;
+        }
+
+        header button {
+            margin: 3px;
+            padding: 6px 10px;
+            font-size: 15px;
+            cursor: pointer;
+            background-color: #fff;
+            border: none;
+            color: #1b8415;
+            border-radius: 4px;
+        }
+
+        /* Main Content Styling */
+
+        main {
+            padding: 20px;
+        }
+
+        /* Instructions */
+
+        #instructions {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 2px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Ranking Section Styling */
+
+        #rankingSection {
+            margin-bottom: 20px;
+        }
+
+        #rankingSection h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        #rankingTable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        #rankingTable th,
+        #rankingTable td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        #rankingTable th {
+            background-color: #e0e0e0;
+            color: #333;
+            border-bottom: 2px solid #ccc;
+        }
+
+        #rankingTable tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Property Cards Styling */
+
+        #propertyCards {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .propertyCard {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            position: relative;
+        }
+
+        .propertyCard h3 {
+            margin-top: 0;
+            font-size: 20px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .propertyCard label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .propertyCard input,
+        .propertyCard select,
+        .propertyCard textarea {
+            width: 100%;
+            margin-top: 5px;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .metrics {
+            background-color: #fafafa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .metrics p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .positive {
+            color: #1b8415;
+        }
+
+        .negative {
+            color: #e53935;
+        }
+
+        .propertyActions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .propertyActions button {
+            margin-left: 5px;
+            background-color: #e53935;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Responsive Design */
+
+        @media (max-width: 600px) {
+            header button {
+                padding: 5px 8px;
+                font-size: 12px;
+            }
+
+            #rankingSection h2 {
+                font-size: 20px;
+            }
+
+            #rankingTable th,
+            #rankingTable td {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .propertyCard h3 {
+                font-size: 18px;
+            }
+
+            .propertyCard label {
+                font-size: 12px;
+            }
+
+            .propertyCard input,
+            .propertyCard select,
+            .propertyCard textarea {
+                font-size: 12px;
+            }
+
+            .metrics p {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Instructions -->
+    <section id="instructions">
+        <p><strong>How to Use the Property Investment Analyzer:</strong></p>
+        <p><strong>Add a Property:</strong> Click "Add Property" to create a new property card at the top of the list.</p>
+        <p><strong>Import Data from Redfin:</strong></p>
+        <ul>
+            <li>Copy property details from a Redfin listing.</li>
+            <li>Paste the data into "Paste Redfin Data" on the property card.</li>
+            <li>Click "Parse Redfin Data" to auto-fill the information.</li>
+        </ul>
+        <p><strong>Review and Edit Details:</strong> Check the auto-filled fields for accuracy. Edit the Address, Purchase Price, and Unit Rents as needed.</p>
+        <p><strong>Adjust Financial Inputs:</strong> Modify the Interest Rate, Down Payment, Expected Appreciation, Property Tax Rate, and Monthly Utilities to match your assumptions.</p>
+        <p><strong>View Metrics:</strong> The app calculates key metrics like Monthly Cash Flow, ROI, Cap Rate, NOI, and Total Return. Review these in the Metrics section.</p>
+        <p><strong>Compare Properties:</strong> Use the Property Ranking table to compare properties based on ROI and total return.</p>
+        <p><strong>Export/Import Data:</strong> Click "Export CSV" to save your data or "Import CSV" to load existing data.</p>
+        <p><strong>Delete a Property:</strong> Use the "Delete" button on a property card to remove it from the analysis.</p>
+    </section>
+    <header>
+        <div class="header-actions">
+            <button id="addPropertyBtn">Add Property</button>
+            <button id="importCSVBtn">Import CSV</button>
+            <button id="exportCSVBtn">Export CSV</button>
+            <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+        </div>
+    </header>
+    <main>
+        <!-- Ranking Section -->
+        <section id="rankingSection">
+            <h2>Property Ranking</h2>
+            <table id="rankingTable">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Address</th>
+                        <th>ROI (%)</th>
+                        <th>Cash Flow</th>
+                        <th>Cap Rate (%)</th>
+                        <th>NOI</th>
+                        <th>Total Return (30 yrs)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Ranking data will be dynamically added here -->
+                </tbody>
+            </table>
+        </section>
+        <!-- Property Cards -->
+        <section id="propertyCards">
+            <!-- Property cards will be dynamically added here -->
+        </section>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let properties = JSON.parse(localStorage.getItem('properties')) || [];
+
+            function updateLocalStorage() {
+                localStorage.setItem('properties', JSON.stringify(properties));
+            }
+
+            // Global defaults object
+            const defaults = {
+                propertyTaxRate: 2.1, // Default property tax rate (%)
+                insuranceRate: 0.3, // Insurance rate (% of purchase price annually)
+                interestRate: 6.6, // Default interest rate (%)
+                downPaymentPercentage: 20, // Default down payment (%)
+                closingCostPercentage: 4, // Closing costs (% of purchase price)
+                loanTerm: 30, // Loan term in years
+                propertyManagerRate: 8, // Property management fee (% of rental income)
+                vacancyRate: 8, // Vacancy rate (% of rental income)
+                maintenanceRate: 1, // Maintenance rate (% of purchase price annually)
+                appreciationRate: 3, // Expected appreciation (% per year)
+                utilities: 100, // Default utilities cost per month
+                renovationCosts: 0 // Default renovation costs
+            };
+
+            // Function to create ranking table
+            function updateRanking() {
+                const rankingTableBody = document.querySelector('#rankingTable tbody');
+                rankingTableBody.innerHTML = '';
+
+                // Sort properties by ROI descending
+                properties.sort((a, b) => b.metrics.roiValue - a.metrics.roiValue);
+
+                properties.forEach((property, index) => {
+                    const row = document.createElement('tr');
+
+                    const rankCell = document.createElement('td');
+                    rankCell.innerText = index + 1;
+
+                    const addressCell = document.createElement('td');
+                    // Shorten the address to street address
+                    addressCell.innerText = property.address.split(',')[0] || 'N/A';
+
+                    const roiCell = document.createElement('td');
+                    roiCell.innerText = property.metrics.roiValue ? property.metrics.roiValue + '%' : 'N/A';
+
+                    const cashFlowCell = document.createElement('td');
+                    cashFlowCell.innerText = property.metrics['Monthly Cash Flow'] || 'N/A';
+
+                    const capRateCell = document.createElement('td');
+                    capRateCell.innerText = property.metrics.capRateValue ? property.metrics.capRateValue + '%' : 'N/A';
+
+                    const noiCell = document.createElement('td');
+                    noiCell.innerText = property.metrics['NOI'] || 'N/A';
+
+                    const totalReturnCell = document.createElement('td');
+                    totalReturnCell.innerText = property.metrics['Total Return (30 yrs)'] ? property.metrics['Total Return (30 yrs)'] : 'N/A';
+
+                    row.appendChild(rankCell);
+                    row.appendChild(addressCell);
+                    row.appendChild(roiCell);
+                    row.appendChild(cashFlowCell);
+                    row.appendChild(capRateCell);
+                    row.appendChild(noiCell);
+                    row.appendChild(totalReturnCell);
+
+                    rankingTableBody.appendChild(row);
+                });
+            }
+
+            // Function to create a property card
+            function createPropertyCard(property, index) {
+                const card = document.createElement('div');
+                card.className = 'propertyCard';
+
+                // Property Actions (Delete)
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'propertyActions';
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerText = 'Delete';
+                deleteBtn.title = 'Delete Property';
+                deleteBtn.onclick = () => deleteProperty(index);
+
+                actionsDiv.appendChild(deleteBtn);
+                card.appendChild(actionsDiv);
+
+                // Property Title
+                const title = document.createElement('h3');
+                // Shorten the address to street address
+                title.innerText = property.address.split(',')[0] || 'New Property';
+                card.appendChild(title);
+
+                // Redfin Data Parser at the Top
+                const redfinLabel = document.createElement('label');
+                redfinLabel.innerText = 'Paste Redfin Data';
+                const redfinTextarea = document.createElement('textarea');
+                redfinTextarea.rows = 4;
+                const parseBtn = document.createElement('button');
+                parseBtn.innerText = 'Parse Redfin Data';
+                parseBtn.style.marginTop = '5px';
+                parseBtn.onclick = () => {
+                    parseRedfinData(redfinTextarea.value, property, card, index);
+                    redfinTextarea.value = '';
+                };
+                card.appendChild(redfinLabel);
+                card.appendChild(redfinTextarea);
+                card.appendChild(parseBtn);
+
+                // Input Fields Section
+                const inputSection = document.createElement('div');
+                inputSection.className = 'inputSection';
+
+                // Address Input
+                const addressLabel = document.createElement('label');
+                addressLabel.innerText = 'Address';
+                const addressInput = document.createElement('input');
+                addressInput.placeholder = 'Enter property address';
+                addressInput.value = property.address || '';
+                addressInput.oninput = (e) => {
+                    property.address = e.target.value;
+                    updateLocalStorage();
+                    title.innerText = property.address.split(',')[0] || 'New Property';
+                    updateRanking();
+                };
+                inputSection.appendChild(addressLabel);
+                inputSection.appendChild(addressInput);
+
+                // Purchase Price Input
+                const priceLabel = document.createElement('label');
+                priceLabel.innerText = 'Purchase Price';
+                const priceInput = document.createElement('input');
+                priceInput.type = 'number';
+                priceInput.placeholder = 'Enter purchase price';
+                priceInput.value = property.purchasePrice || '';
+                priceInput.oninput = (e) => {
+                    property.purchasePrice = parseFloat(e.target.value) || 0;
+                    calculateMetrics(property);
+                    updateLocalStorage();
+                    updateMetricsDisplay(metricsDiv, property.metrics);
+                    updateRanking();
+                };
+                inputSection.appendChild(priceLabel);
+                inputSection.appendChild(priceInput);
+
+                // Down Payment Percentage Input
+                const downPaymentLabel = document.createElement('label');
+                downPaymentLabel.innerText = 'Down Payment (%)';
+                const downPaymentInput = document.createElement('input');
+                downPaymentInput.type = 'number';
+                downPaymentInput.placeholder = 'Enter down payment percentage';
+                downPaymentInput.value = property.downPaymentPercentage || defaults.downPaymentPercentage;
+                downPaymentInput.oninput = (e) => {
+                    property.downPaymentPercentage = parseFloat(e.target.value) || defaults.downPaymentPercentage;
+                    calculateMetrics(property);
+                    updateLocalStorage();
+                    updateMetricsDisplay(metricsDiv, property.metrics);
+                    updateRanking();
+                };
+                inputSection.appendChild(downPaymentLabel);
+                inputSection.appendChild(downPaymentInput);
+
+                // Interest Rate Input
+                const interestLabel = document.createElement('label');
+                interestLabel.innerText = 'Interest Rate (%)';
+                const interestInput = document.createElement('input');
+                interestInput.type = 'number';
+                interestInput.placeholder = 'Enter interest rate';
+                interestInput.value = property.interestRate || defaults.interestRate;
+                interestInput.oninput = (e) => {
+                    property.interestRate = parseFloat(e.target.value) || defaults.interestRate;
+                    calculateMetrics(property);
+                    updateLocalStorage();
+                    updateMetricsDisplay(metricsDiv, property.metrics);
+                    updateRanking();
+                };
+                inputSection.appendChild(interestLabel);
+                inputSection.appendChild(interestInput);
+
+                // Loan Term Input
+                const loanTermLabel = document.createElement('label');
+                loanTermLabel.innerText = 'Loan Term (years)';
+                const loanTermInput = document.createElement('input');
+                loanTermInput.type = 'number';
+                loanTermInput.placeholder = 'Enter loan term in years';
+                loanTermInput.value = property.loanTerm || defaults.loanTerm;
+                loanTermInput.oninput = (e) => {
+                    property.loanTerm = parseInt(e.target.value) || defaults.loanTerm;
+                    calculateMetrics(property);
+                    updateLocalStorage();
+                    updateMetricsDisplay(metricsDiv, property.metrics);
+                };
+                inputSection.appendChild(loanTermLabel);
+                inputSection.appendChild(loanTermInput);
+
+                // Expected Appreciation Rate
+                const appreciationLabel = document.createElement('label');
+                appreciationLabel.innerText = 'Expected Appreciation (% per year)';
+                const appreciationInput = document.createElement('input');
+                appreciationInput.type = 'number';
+                appreciationInput.placeholder = 'Enter expected appreciation rate';
+                appreciationInput.value = property.appreciationRate || defaults.appreciationRate;
+                appreciationInput.oninput = (e) => {
+                    property.appreciationRate = parseFloat(e.target.value) || defaults.appreciationRate;
+                    calculateMetrics(property);
+                    updateLocalStorage();
+                    updateMetricsDisplay(metricsDiv, property.metrics);
+                };
+                inputSection.appendChild(appreciationLabel);
+                inputSection.appendChild(appreciationInput);
+
+                // **Property Tax Rate Input**
+                const propertyTaxLabel = document.createElement('label');
+                propertyTaxLabel.innerText = 'Property Tax Rate (%)';
+                const propertyTaxInput = document.createElement('input');
+                propertyTaxInput.type = 'number';
+                propertyTaxInput.placeholder = 'Enter property tax rate';
+                propertyTaxInput.value = property.propertyTaxRate || defaults.propertyTaxRate;
+                propertyTaxInput.oninput = (e) => {
+                    property.propertyTaxRate = parseFloat(e.target.value) || defaults.propertyTaxRate;
+                    calculateMetrics(property);
+                    updateLocalStorage();
+                    updateMetricsDisplay(metricsDiv, property.metrics);
+                    updateRanking();
+                };
+                inputSection.appendChild(propertyTaxLabel);
+                inputSection.appendChild(propertyTaxInput);
+
+                // Utilities Input
+                const utilitiesLabel = document.createElement('label');
+                utilitiesLabel.innerText = 'Monthly Utilities';
+                const utilitiesInput = document.createElement('input');
+                utilitiesInput.type = 'number';
+                utilitiesInput.placeholder = 'Enter monthly utilities cost';
+                utilitiesInput.value = property.utilities || defaults.utilities;
+                utilitiesInput.oninput = (e) => {
+                    property.utilities = parseFloat(e.target.value) || defaults.utilities;
+                    calculateMetrics(property);
+                    updateLocalStorage();
+                    updateMetricsDisplay(metricsDiv, property.metrics);
+                    updateRanking();
+                };
+                inputSection.appendChild(utilitiesLabel);
+                inputSection.appendChild(utilitiesInput);
+
+                // Append input section to card
+                card.appendChild(inputSection);
+
+                // Rent Inputs for Units (10 static fields)
+                const rentSection = document.createElement('div');
+                rentSection.className = 'rentSection';
+                const rentLabel = document.createElement('label');
+                rentLabel.innerText = 'Unit Rents';
+                rentSection.appendChild(rentLabel);
+
+                for (let i = 0; i < 10; i++) {
+                    const unitRentInput = document.createElement('input');
+                    unitRentInput.type = 'number';
+                    unitRentInput.placeholder = 'Unit ' + (i + 1) + ' Rent';
+                    unitRentInput.value = property.rents[i] || '';
+                    unitRentInput.oninput = (e) => {
+                        property.rents[i] = parseFloat(e.target.value) || 0;
+                        calculateMetrics(property);
+                        updateLocalStorage();
+                        updateMetricsDisplay(metricsDiv, property.metrics);
+                        updateRanking();
+                    };
+                    rentSection.appendChild(unitRentInput);
+                }
+
+                card.appendChild(rentSection);
+
+                // Metrics Display
+                const metricsDiv = document.createElement('div');
+                metricsDiv.className = 'metrics';
+                calculateMetrics(property);
+                updateMetricsDisplay(metricsDiv, property.metrics);
+                card.appendChild(metricsDiv);
+
+                // Insert the card at the top
+                const propertyCardsDiv = document.getElementById('propertyCards');
+                propertyCardsDiv.insertBefore(card, propertyCardsDiv.firstChild);
+            }
+
+            // Function to update metrics display
+            function updateMetricsDisplay(metricsDiv, metrics) {
+                metricsDiv.innerHTML = '';
+
+                for (const key in metrics) {
+                    if (key.endsWith('Value')) continue; // Skip value-only keys
+                    const p = document.createElement('p');
+                    p.innerHTML = `<strong>${key}:</strong> ${metrics[key]}`;
+                    if (key.includes('Cash Flow') || key.includes('ROI') || key.includes('Cap Rate') || key.includes('NOI')) {
+                        const value = parseFloat(metrics[key].replace(/[^\d.-]/g, '')); // parse value as number
+                        p.className = value >= 0 ? 'positive' : 'negative'; // Positive is green, negative is red
+                    }
+                    metricsDiv.appendChild(p);
+                }
+            }
+
+            // Function to calculate financial metrics
+            function calculateMetrics(property) {
+                // Use property values or defaults
+                const purchasePrice = property.purchasePrice || 0;
+                const downPaymentPercentage = property.downPaymentPercentage || defaults.downPaymentPercentage;
+                const interestRate = property.interestRate || defaults.interestRate;
+                const loanTerm = property.loanTerm || defaults.loanTerm;
+                const propertyTaxRate = property.propertyTaxRate || defaults.propertyTaxRate;
+                const insuranceRate = property.insuranceRate || defaults.insuranceRate;
+                const propertyManagerRate = property.propertyManagerRate || defaults.propertyManagerRate;
+                const vacancyRate = property.vacancyRate || defaults.vacancyRate;
+                const maintenanceRate = property.maintenanceRate || defaults.maintenanceRate;
+                const appreciationRate = property.appreciationRate || defaults.appreciationRate;
+                const closingCostPercentage = property.closingCostPercentage || defaults.closingCostPercentage;
+                const utilities = property.utilities || defaults.utilities;
+                const renovationCosts = property.renovationCosts || defaults.renovationCosts;
+
+                const downPayment = (downPaymentPercentage / 100) * purchasePrice;
+                const loanAmount = purchasePrice - downPayment;
+                const closingCosts = (purchasePrice * closingCostPercentage) / 100;
+                const totalInvestment = downPayment + closingCosts + renovationCosts;
+
+                const monthlyInterestRate = (interestRate / 100) / 12;
+                const numberOfPayments = loanTerm * 12;
+
+                // Monthly Mortgage Payment (Amortization Formula)
+                const monthlyMortgagePayment = loanAmount > 0 ? loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) /
+                    (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1) : 0;
+
+                // Total Monthly Rent
+                const totalMonthlyRent = property.rents.reduce((sum, rent) => sum + (rent || 0), 0);
+
+                // Other Expenses
+                const monthlyPropertyTax = ((purchasePrice * (propertyTaxRate / 100)) / 12);
+                const monthlyInsurance = ((purchasePrice * (insuranceRate / 100)) / 12);
+                const monthlyMaintenance = ((purchasePrice * (maintenanceRate / 100)) / 12);
+                const monthlyPropertyManagement = totalMonthlyRent * (propertyManagerRate / 100);
+                const monthlyVacancy = totalMonthlyRent * (vacancyRate / 100);
+                const monthlyUtilities = utilities;
+
+                // Total Monthly Expenses (excluding mortgage for NOI calculation)
+                const totalOperatingExpenses = monthlyPropertyTax + monthlyInsurance + monthlyMaintenance + monthlyPropertyManagement + monthlyVacancy + monthlyUtilities;
+
+                // Net Operating Income (NOI)
+                const NOI = totalMonthlyRent - totalOperatingExpenses;
+
+                // Cap Rate
+                const capRate = purchasePrice > 0 ? (NOI * 12 / purchasePrice) * 100 : 0;
+
+                // Total Monthly Expenses (including mortgage for cash flow)
+                const monthlyExpenses = totalOperatingExpenses + monthlyMortgagePayment;
+
+                // Monthly Cash Flow
+                const monthlyCashFlow = totalMonthlyRent - monthlyExpenses;
+
+                // Total Return over 30 Years
+                const totalReturn30 = (monthlyCashFlow * 12 * 30 + (purchasePrice * Math.pow(1 + (appreciationRate / 100), 30)) - loanAmount - totalInvestment).toFixed(2);
+
+                // Expected Property Value after 30 Years
+                const futurePropertyValue = purchasePrice * Math.pow(1 + (appreciationRate / 100), 30);
+
+                // Equity Growth
+                const equityGrowth = futurePropertyValue - loanAmount;
+
+                // ROI Calculations
+                const annualCashFlow = monthlyCashFlow * 12;
+                const roi = totalInvestment > 0 ? (annualCashFlow / totalInvestment) * 100 : 0;
+
+                // Cash-on-Cash Return
+                const cashOnCashReturn = totalInvestment > 0 ? (annualCashFlow / totalInvestment) * 100 : 0;
+
+                // Debt Service Coverage Ratio (DSCR)
+                const annualDebtService = monthlyMortgagePayment * 12;
+                const DSCR = annualDebtService > 0 ? NOI * 12 / annualDebtService : 0;
+
+                // Set metrics
+                property.metrics = {
+                    'Total Monthly Rental Income': '$' + totalMonthlyRent.toFixed(2),
+                    'Monthly Expenses': '$' + monthlyExpenses.toFixed(2),
+                    'Monthly Cash Flow': '$' + monthlyCashFlow.toFixed(2),
+                    'NOI': '$' + NOI.toFixed(2),
+                    'Cap Rate': capRate.toFixed(2) + '%',
+                    'Cash-on-Cash Return': cashOnCashReturn.toFixed(2) + '%',
+                    'DSCR': DSCR.toFixed(2),
+                    'Total Return (30 yrs)': '$' + Number(totalReturn30).toLocaleString(),
+                    'Future Property Value (30 yrs)': '$' + futurePropertyValue.toLocaleString(),
+                    'Equity Growth (30 yrs)': '$' + equityGrowth.toLocaleString(),
+                    'ROI': roi.toFixed(2) + '%',
+                    'Total Investment': '$' + totalInvestment.toLocaleString(),
+                    'Expense Breakdown': `
+                        <ul>
+                            <li>Mortgage Payment: $${monthlyMortgagePayment.toFixed(2)}</li>
+                            <li>Property Tax (${propertyTaxRate}%): $${monthlyPropertyTax.toFixed(2)}</li>
+                            <li>Insurance: $${monthlyInsurance.toFixed(2)}</li>
+                            <li>Maintenance: $${monthlyMaintenance.toFixed(2)}</li>
+                            <li>Property Management: $${monthlyPropertyManagement.toFixed(2)}</li>
+                            <li>Vacancy Allowance: $${monthlyVacancy.toFixed(2)}</li>
+                            <li>Utilities: $${monthlyUtilities.toFixed(2)}</li>
+                        </ul>
+                    `,
+                    'roiValue': roi.toFixed(2),
+                    'monthlyCashFlowValue': monthlyCashFlow.toFixed(2),
+                    'capRateValue': capRate.toFixed(2)
+                };
+            }
+
+            // Function to add a new property
+            function addProperty() {
+                const newProperty = {
+                    address: '',
+                    purchasePrice: 0,
+                    rents: Array(10).fill(0),
+                    downPaymentPercentage: defaults.downPaymentPercentage,
+                    interestRate: defaults.interestRate,
+                    loanTerm: defaults.loanTerm,
+                    propertyTaxRate: defaults.propertyTaxRate,
+                    insuranceRate: defaults.insuranceRate,
+                    propertyManagerRate: defaults.propertyManagerRate,
+                    vacancyRate: defaults.vacancyRate,
+                    maintenanceRate: defaults.maintenanceRate,
+                    utilities: defaults.utilities,
+                    renovationCosts: defaults.renovationCosts,
+                    closingCostPercentage: defaults.closingCostPercentage,
+                    appreciationRate: defaults.appreciationRate,
+                    metrics: {}
+                };
+                calculateMetrics(newProperty);
+                properties.unshift(newProperty); // Add to the beginning
+                updateLocalStorage();
+                renderProperties();
+                updateRanking();
+            }
+
+            // Function to delete a property
+            function deleteProperty(index) {
+                properties.splice(index, 1);
+                updateLocalStorage();
+                renderProperties();
+                updateRanking();
+            }
+
+            // Function to render all properties
+            function renderProperties() {
+                const propertyCardsDiv = document.getElementById('propertyCards');
+                propertyCardsDiv.innerHTML = '';
+                properties.forEach((property, index) => {
+                    createPropertyCard(property, index);
+                });
+            }
+
+            // Function to parse Redfin data
+            function parseRedfinData(data, property, card, index) {
+                try {
+                    // Address Parsing
+                    const addressRegex = /(\d+\s+[^\n,]+),\s*[^,]+,\s*\w{2}\s*\d{5}/;
+                    const addressMatch = data.match(addressRegex);
+                    if (addressMatch) {
+                        property.address = addressMatch[0];
+                        card.querySelector('input').value = property.address;
+                        card.querySelector('h3').textContent = property.address.split(',')[0];
+                    }
+
+                    // Price Parsing with multiple possible labels
+                    const priceRegex = /(?:Price|List Price|Asking Price|Sold Price|Home price|Price Changed)[:\s]*\$?([\d,]+)/i;
+                    const priceMatch = data.match(priceRegex);
+                    if (priceMatch) {
+                        property.purchasePrice = parseFloat(priceMatch[1].replace(/[\$,]/g, ''));
+                        card.querySelectorAll('input')[1].value = property.purchasePrice;
+                    }
+
+                    // Property Tax Parsing
+                    const taxRegex = /(?:Property taxes|Tax Annual Amount)[:\s]*\$?([\d,]+)/i;
+                    const taxMatch = data.match(taxRegex);
+                    if (taxMatch) {
+                        const annualTax = parseFloat(taxMatch[1].replace(/[\$,]/g, ''));
+                        if (property.purchasePrice > 0) {
+                            property.propertyTaxRate = ((annualTax * 100) / property.purchasePrice).toFixed(2);
+                            card.querySelectorAll('input')[6].value = property.propertyTaxRate;
+                        }
+                    }
+
+                    // Insurance Parsing
+                    const insuranceRegex = /(?:Homeowners insurance)[:\s]*\$?([\d,]+)/i;
+                    const insuranceMatch = data.match(insuranceRegex);
+                    if (insuranceMatch) {
+                        property.insurance = parseFloat(insuranceMatch[1].replace(/[\$,]/g, ''));
+                    }
+
+                    // Monthly Rent Parsing
+                    const rentRegex = /(?:Rent|Unit.*?Rent|Rent Amount|Monthly Income|Monthly Rent|Lease Income|Rental Rate|Collected Rent)[:\s]*\$?([\d,]+)/gi;
+
+                    let rentMatch;
+                    let rents = [];
+                    while ((rentMatch = rentRegex.exec(data)) !== null) {
+                        const rent = parseFloat(rentMatch[1].replace(/[\$,]/g, ''));
+                        rents.push(rent);
+                    }
+                    if (rents.length > 0) {
+                        for (let i = 0; i < 10; i++) {
+                            property.rents[i] = rents[i] || 0;
+                            const rentInputs = card.querySelector('.rentSection').querySelectorAll('input');
+                            rentInputs[i].value = property.rents[i];
+                        }
+                    }
+
+                    // Utilities Expense Parsing
+                    const utilitiesRegex = /(?:Utilities|Water Sewer Expense|Electric Expense)[:\s]*\$?([\d,]+)/i;
+                    const utilitiesMatch = data.match(utilitiesRegex);
+                    if (utilitiesMatch) {
+                        let parsedUtilities = parseFloat(utilitiesMatch[1].replace(/[\$,]/g, ''));
+                        // Assume annual if parsedUtilities seems too high for monthly
+                        if (parsedUtilities > 1000) { // Threshold to check if it's annual
+                            parsedUtilities = parsedUtilities / 12;
+                        }
+                        property.utilities = parsedUtilities;
+                    }
+
+                    // Mortgage Interest Rate Parsing
+                    const interestRateRegex = /Interest Rate[:\s]*([\d.]+)/i;
+                    const interestMatch = data.match(interestRateRegex);
+                    if (interestMatch) {
+                        property.interestRate = parseFloat(interestMatch[1]) || property.interestRate;
+                        card.querySelectorAll('input')[3].value = property.interestRate;
+                    }
+
+                    // Vacancy Rate Parsing
+                    const vacancyRegex = /(?:Vacancy Allowance|Vacancy Rate)[:\s]*([\d.]+)/i;
+                    const vacancyMatch = data.match(vacancyRegex);
+                    if (vacancyMatch) {
+                        property.vacancyRate = parseFloat(vacancyMatch[1]) || property.vacancyRate;
+                    }
+
+                    // Closing Cost Percentage
+                    const closingCostRegex = /Closing Cost[:\s]*([\d.]+)/i;
+                    const closingCostMatch = data.match(closingCostRegex);
+                    if (closingCostMatch) {
+                        property.closingCostPercentage = parseFloat(closingCostMatch[1]) || property.closingCostPercentage;
+                    }
+
+                    // Update metrics and storage after parsing
+                    calculateMetrics(property);
+                    updateMetricsDisplay(card.querySelector('.metrics'), property.metrics);
+                    updateLocalStorage();
+                    updateRanking();
+
+                } catch (error) {
+                    alert('Error parsing Redfin data: ' + error.message);
+                }
+            }
+
+            // Event listener for 'Add Property' button
+            document.getElementById('addPropertyBtn').addEventListener('click', addProperty);
+
+            // Event listener for 'Export CSV' button
+            document.getElementById('exportCSVBtn').addEventListener('click', () => {
+                const exportData = properties.map(property => ({
+                    address: property.address,
+                    purchasePrice: property.purchasePrice,
+                    rents: JSON.stringify(property.rents), // Keep rents in JSON for multiple units
+                    downPaymentPercentage: property.downPaymentPercentage,
+                    interestRate: property.interestRate,
+                    utilities: property.utilities,
+                    appreciationRate: property.appreciationRate,
+                    loanTerm: property.loanTerm,
+                    propertyTaxRate: property.propertyTaxRate,
+                    insuranceRate: property.insuranceRate,
+                    propertyManagerRate: property.propertyManagerRate,
+                    vacancyRate: property.vacancyRate,
+                    maintenanceRate: property.maintenanceRate,
+                    closingCostPercentage: property.closingCostPercentage,
+                    renovationCosts: property.renovationCosts,
+                    metrics: JSON.stringify(property.metrics) // store calculated metrics as JSON
+                }));
+                const csv = Papa.unparse(exportData);
+                const blob = new Blob([csv], {
+                    type: 'text/csv;charset=utf-8;'
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'properties.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            // Event listener for 'Import CSV' button
+            document.getElementById('importCSVBtn').addEventListener('click', () => {
+                document.getElementById('csvFileInput').click();
+            });
+
+            // Handle CSV File Input for importing
+            document.getElementById('csvFileInput').addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    Papa.parse(file, {
+                        header: true,
+                        complete: function (results) {
+                            properties = results.data.map(item => {
+                                return {
+                                    address: item.address,
+                                    purchasePrice: parseFloat(item.purchasePrice) || 0,
+                                    rents: JSON.parse(item.rents || '[]'), // parse rents back from JSON
+                                    downPaymentPercentage: parseFloat(item.downPaymentPercentage) || defaults.downPaymentPercentage,
+                                    interestRate: parseFloat(item.interestRate) || defaults.interestRate,
+                                    utilities: parseFloat(item.utilities) || defaults.utilities,
+                                    appreciationRate: parseFloat(item.appreciationRate) || defaults.appreciationRate,
+                                    loanTerm: parseInt(item.loanTerm) || defaults.loanTerm,
+                                    propertyTaxRate: parseFloat(item.propertyTaxRate) || defaults.propertyTaxRate,
+                                    insuranceRate: parseFloat(item.insuranceRate) || defaults.insuranceRate,
+                                    propertyManagerRate: parseFloat(item.propertyManagerRate) || defaults.propertyManagerRate,
+                                    vacancyRate: parseFloat(item.vacancyRate) || defaults.vacancyRate,
+                                    maintenanceRate: parseFloat(item.maintenanceRate) || defaults.maintenanceRate,
+                                    closingCostPercentage: parseFloat(item.closingCostPercentage) || defaults.closingCostPercentage,
+                                    renovationCosts: parseFloat(item.renovationCosts) || defaults.renovationCosts,
+                                    metrics: JSON.parse(item.metrics || '{}') // parse metrics back from JSON
+                                };
+                            });
+                            updateLocalStorage();
+                            renderProperties();
+                            updateRanking();
+                        }
+                    });
+                }
+            });
+
+            // Initial rendering of properties
+            renderProperties();
+            updateRanking();
+        });
+    </script>
+</body>
+
+</html>
