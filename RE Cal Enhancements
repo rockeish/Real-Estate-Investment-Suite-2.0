@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Real Estate Investment Calculator</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles for a polished look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+
+        /* Custom styling for range sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4f46e5; /* Indigo color for thumb */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        /* Card styling */
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Custom class to prevent layout shift in results */
+        .result-value {
+            min-height: 2.5rem; /* Adjust as needed */
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Real Estate Investment Calculator</h1>
+            <p class="text-lg text-gray-600 mt-2">Analyze rental properties with detailed financial projections and visualizations.</p>
+        </header>
+
+        <!-- Main grid for inputs and results -->
+        <div id="calculator-form" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Inputs -->
+            <div class="space-y-6">
+                <!-- Purchase Information Card -->
+                <div class="card">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-indigo-600">Purchase & Loan</h2>
+                    <div class="space-y-4">
+                        <!-- Input Field: Purchase Price -->
+                        <div>
+                            <label for="purchase_price" class="flex justify-between font-medium text-gray-700">
+                                <span>Purchase Price</span>
+                                <span id="purchase_price_display" class="font-semibold text-indigo-600">$1,395,000</span>
+                            </label>
+                            <input type="range" id="purchase_price" min="50000" max="5000000" step="5000" value="1395000" class="mt-1">
+                        </div>
+                        <!-- Input Field: Down Payment -->
+                        <div>
+                            <label for="down_payment" class="flex justify-between font-medium text-gray-700">
+                                <span>Down Payment</span>
+                                <span id="down_payment_display" class="font-semibold text-indigo-600">$279,000 (20%)</span>
+                            </label>
+                            <input type="range" id="down_payment" min="0" max="100" step="1" value="20" class="mt-1">
+                        </div>
+                         <!-- Input Field: Interest Rate -->
+                        <div>
+                            <label for="interest_rate" class="flex justify-between font-medium text-gray-700">
+                                <span>Interest Rate (%)</span>
+                                <span id="interest_rate_display" class="font-semibold text-indigo-600">5.50%</span>
+                            </label>
+                            <input type="range" id="interest_rate" min="1" max="12" step="0.125" value="5.5" class="mt-1">
+                        </div>
+                        <!-- Input Field: Loan Term -->
+                        <div>
+                            <label for="loan_term" class="flex justify-between font-medium text-gray-700">
+                                <span>Loan Term (Years)</span>
+                                <span id="loan_term_display" class="font-semibold text-indigo-600">30</span>
+                            </label>
+                            <input type="range" id="loan_term" min="5" max="40" step="1" value="30" class="mt-1">
+                        </div>
+                        <!-- Input Field: Closing Costs -->
+                        <div>
+                            <label for="closing_costs" class="flex justify-between font-medium text-gray-700">
+                                <span>Closing & Other Costs</span>
+                                <span id="closing_costs_display" class="font-semibold text-indigo-600">$40,000</span>
+                            </label>
+                            <input type="range" id="closing_costs" min="0" max="200000" step="1000" value="40000" class="mt-1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Income Card -->
+                <div class="card">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-indigo-600">Monthly Income</h2>
+                    <div class="space-y-4">
+                         <!-- Input Field: Gross Monthly Rent -->
+                         <div>
+                            <label for="gross_monthly_rent" class="flex justify-between font-medium text-gray-700">
+                                <span>Gross Monthly Rent</span>
+                                <span id="gross_monthly_rent_display" class="font-semibold text-indigo-600">$7,310</span>
+                            </label>
+                            <input type="range" id="gross_monthly_rent" min="500" max="20000" step="10" value="7310" class="mt-1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expenses Card -->
+                <div class="card">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-indigo-600">Monthly Operating Expenses</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Expense Inputs -->
+                        <div>
+                            <label for="property_taxes" class="flex justify-between text-sm font-medium"><span>Property Taxes</span><span id="property_taxes_display">$1,250</span></label>
+                            <input type="range" id="property_taxes" min="0" max="5000" step="10" value="1250" class="mt-1">
+                        </div>
+                        <div>
+                            <label for="insurance" class="flex justify-between text-sm font-medium"><span>Insurance</span><span id="insurance_display">$183</span></label>
+                            <input type="range" id="insurance" min="0" max="1000" step="5" value="183" class="mt-1">
+                        </div>
+                        <div>
+                            <label for="repairs_maintenance" class="flex justify-between text-sm font-medium"><span>Repairs & Maintenance (%)</span><span id="repairs_maintenance_display">5%</span></label>
+                            <input type="range" id="repairs_maintenance" min="0" max="25" step="1" value="5" class="mt-1">
+                        </div>
+                        <div>
+                            <label for="vacancy_rate" class="flex justify-between text-sm font-medium"><span>Vacancy Rate (%)</span><span id="vacancy_rate_display">5%</span></label>
+                            <input type="range" id="vacancy_rate" min="0" max="50" step="1" value="5" class="mt-1">
+                        </div>
+                        <div>
+                            <label for="property_management" class="flex justify-between text-sm font-medium"><span>Property Management (%)</span><span id="property_management_display">8%</span></label>
+                            <input type="range" id="property_management" min="0" max="20" step="1" value="8" class="mt-1">
+                        </div>
+                         <div>
+                            <label for="other_expenses" class="flex justify-between text-sm font-medium"><span>Other (HOA, etc.)</span><span id="other_expenses_display">$90</span></label>
+                            <input type="range" id="other_expenses" min="0" max="1000" step="10" value="90" class="mt-1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Results & Charts -->
+            <div class="space-y-6">
+                <!-- Key Metrics Card -->
+                <div class="card">
+                    <h2 class="text-2xl font-bold mb-4 border-b pb-2 text-indigo-600">Key Performance Metrics</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-sm text-gray-500">Cash Flow</div>
+                            <div id="monthly_cash_flow" class="text-2xl font-bold text-green-600 result-value"></div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Cap Rate</div>
+                            <div id="cap_rate" class="text-2xl font-bold text-indigo-600 result-value"></div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Cash on Cash ROI</div>
+                            <div id="cash_on_cash_roi" class="text-2xl font-bold text-indigo-600 result-value"></div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Total Investment</div>
+                            <div id="total_investment" class="text-xl font-semibold text-gray-700 result-value"></div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Loan Payment</div>
+                            <div id="loan_payment" class="text-xl font-semibold text-gray-700 result-value"></div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500">Net Op. Income</div>
+                            <div id="noi" class="text-xl font-semibold text-gray-700 result-value"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts -->
+                <div class="card">
+                    <h3 class="text-xl font-bold mb-4 text-center">Monthly Expense Breakdown</h3>
+                    <div class="w-full h-64 mx-auto">
+                        <canvas id="expenseBreakdownChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                     <h3 class="text-xl font-bold mb-4 text-center">30-Year Cash Flow Projection</h3>
+                     <div class="w-full h-64 mx-auto">
+                        <canvas id="cashFlowChart"></canvas>
+                    </div>
+                </div>
+
+                 <div class="card">
+                     <h3 class="text-xl font-bold mb-4 text-center">Loan Amortization</h3>
+                     <div class="w-full h-64 mx-auto">
+                        <canvas id="loanBalanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Element Selection ---
+        // A centralized object to hold references to all DOM elements for easy access.
+        const elements = {
+            // Inputs
+            purchasePrice: document.getElementById('purchase_price'),
+            downPayment: document.getElementById('down_payment'),
+            interestRate: document.getElementById('interest_rate'),
+            loanTerm: document.getElementById('loan_term'),
+            closingCosts: document.getElementById('closing_costs'),
+            grossMonthlyRent: document.getElementById('gross_monthly_rent'),
+            propertyTaxes: document.getElementById('property_taxes'),
+            insurance: document.getElementById('insurance'),
+            repairsMaintenance: document.getElementById('repairs_maintenance'),
+            vacancyRate: document.getElementById('vacancy_rate'),
+            propertyManagement: document.getElementById('property_management'),
+            otherExpenses: document.getElementById('other_expenses'),
+
+            // Displays for Inputs
+            purchasePriceDisplay: document.getElementById('purchase_price_display'),
+            downPaymentDisplay: document.getElementById('down_payment_display'),
+            interestRateDisplay: document.getElementById('interest_rate_display'),
+            loanTermDisplay: document.getElementById('loan_term_display'),
+            closingCostsDisplay: document.getElementById('closing_costs_display'),
+            grossMonthlyRentDisplay: document.getElementById('gross_monthly_rent_display'),
+            propertyTaxesDisplay: document.getElementById('property_taxes_display'),
+            insuranceDisplay: document.getElementById('insurance_display'),
+            repairsMaintenanceDisplay: document.getElementById('repairs_maintenance_display'),
+            vacancyRateDisplay: document.getElementById('vacancy_rate_display'),
+            propertyManagementDisplay: document.getElementById('property_management_display'),
+            otherExpensesDisplay: document.getElementById('other_expenses_display'),
+
+            // Outputs
+            monthlyCashFlow: document.getElementById('monthly_cash_flow'),
+            capRate: document.getElementById('cap_rate'),
+            cashOnCashRoi: document.getElementById('cash_on_cash_roi'),
+            totalInvestment: document.getElementById('total_investment'),
+            loanPayment: document.getElementById('loan_payment'),
+            noi: document.getElementById('noi'),
+            
+            // Form
+            form: document.getElementById('calculator-form')
+        };
+
+        // --- Chart Instances ---
+        // Store chart instances to prevent re-creation and allow for efficient updates.
+        let charts = {};
+
+        // --- Formatting Helpers ---
+        // Utility functions to format numbers into currency, percentages, etc.
+        const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+        const formatPercent = (value) => `${value.toFixed(2)}%`;
+
+        // --- Core Calculation Logic ---
+        /**
+         * Calculates the monthly mortgage payment.
+         * @param {number} principal - The total loan amount.
+         * @param {number} annualRate - The annual interest rate (e.g., 5.5 for 5.5%).
+         * @param {number} years - The loan term in years.
+         * @returns {number} The monthly mortgage payment.
+         */
+        function calculateMortgagePayment(principal, annualRate, years) {
+            if (principal <= 0) return 0;
+            const monthlyRate = annualRate / 100 / 12;
+            const numberOfPayments = years * 12;
+            if (monthlyRate === 0) return principal / numberOfPayments;
+            return principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+        }
+
+        /**
+         * Main function to gather inputs, perform all calculations, and update the UI.
+         */
+        function calculateAndDisplay() {
+            // --- 1. Gather and Parse Input Values ---
+            const inputs = {
+                purchasePrice: parseFloat(elements.purchasePrice.value),
+                downPaymentPercent: parseFloat(elements.downPayment.value),
+                interestRate: parseFloat(elements.interestRate.value),
+                loanTerm: parseInt(elements.loanTerm.value),
+                closingCosts: parseFloat(elements.closingCosts.value),
+                grossMonthlyRent: parseFloat(elements.grossMonthlyRent.value),
+                propertyTaxes: parseFloat(elements.propertyTaxes.value),
+                insurance: parseFloat(elements.insurance.value),
+                repairsPercent: parseFloat(elements.repairsMaintenance.value),
+                vacancyPercent: parseFloat(elements.vacancyRate.value),
+                managementPercent: parseFloat(elements.propertyManagement.value),
+                otherExpenses: parseFloat(elements.otherExpenses.value)
+            };
+
+            // --- 2. Perform Calculations ---
+            
+            // Initial Investment
+            const downPaymentAmount = inputs.purchasePrice * (inputs.downPaymentPercent / 100);
+            const totalInvestment = downPaymentAmount + inputs.closingCosts;
+            
+            // Loan & Mortgage
+            const loanAmount = inputs.purchasePrice - downPaymentAmount;
+            const monthlyMortgage = calculateMortgagePayment(loanAmount, inputs.interestRate, inputs.loanTerm);
+
+            // Income
+            const vacancyLoss = inputs.grossMonthlyRent * (inputs.vacancyPercent / 100);
+            const effectiveMonthlyRent = inputs.grossMonthlyRent - vacancyLoss;
+
+            // Expenses
+            const repairsAmount = inputs.grossMonthlyRent * (inputs.repairsPercent / 100);
+            const managementAmount = inputs.grossMonthlyRent * (inputs.managementPercent / 100);
+            const totalMonthlyExpenses = monthlyMortgage + inputs.propertyTaxes + inputs.insurance + repairsAmount + vacancyLoss + managementAmount + inputs.otherExpenses;
+            
+            // Performance Metrics
+            const monthlyCashFlow = effectiveMonthlyRent - (totalMonthlyExpenses - vacancyLoss); // Vacancy is already removed from income
+            const annualCashFlow = monthlyCashFlow * 12;
+
+            const operatingExpenses = totalMonthlyExpenses - monthlyMortgage;
+            const annualOperatingExpenses = operatingExpenses * 12;
+            const annualEffectiveRent = effectiveMonthlyRent * 12;
+            const netOperatingIncome = annualEffectiveRent - annualOperatingExpenses;
+            
+            const capRate = (netOperatingIncome / inputs.purchasePrice) * 100;
+            const cashOnCashRoi = (annualCashFlow / totalInvestment) * 100;
+
+            // --- 3. Update UI Displays ---
+            
+            // Input value displays
+            elements.purchasePriceDisplay.textContent = formatCurrency(inputs.purchasePrice);
+            elements.downPaymentDisplay.textContent = `${formatCurrency(downPaymentAmount)} (${inputs.downPaymentPercent}%)`;
+            elements.interestRateDisplay.textContent = formatPercent(inputs.interestRate);
+            elements.loanTermDisplay.textContent = `${inputs.loanTerm}`;
+            elements.closingCostsDisplay.textContent = formatCurrency(inputs.closingCosts);
+            elements.grossMonthlyRentDisplay.textContent = formatCurrency(inputs.grossMonthlyRent);
+            elements.propertyTaxesDisplay.textContent = formatCurrency(inputs.propertyTaxes);
+            elements.insuranceDisplay.textContent = formatCurrency(inputs.insurance);
+            elements.repairsMaintenanceDisplay.textContent = `${inputs.repairsPercent}%`;
+            elements.vacancyRateDisplay.textContent = `${inputs.vacancyPercent}%`;
+            elements.propertyManagementDisplay.textContent = `${inputs.managementPercent}%`;
+            elements.otherExpensesDisplay.textContent = formatCurrency(inputs.otherExpenses);
+
+            // Result displays
+            elements.monthlyCashFlow.textContent = formatCurrency(monthlyCashFlow);
+            elements.monthlyCashFlow.className = `text-2xl font-bold result-value ${monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            elements.capRate.textContent = isFinite(capRate) ? formatPercent(capRate) : 'N/A';
+            elements.cashOnCashRoi.textContent = isFinite(cashOnCashRoi) ? formatPercent(cashOnCashRoi) : 'N/A';
+            elements.totalInvestment.textContent = formatCurrency(totalInvestment);
+            elements.loanPayment.textContent = formatCurrency(monthlyMortgage);
+            elements.noi.textContent = formatCurrency(netOperatingIncome / 12);
+
+            // --- 4. Update Charts ---
+            updateExpenseChart({
+                'Mortgage': monthlyMortgage,
+                'Taxes': inputs.propertyTaxes,
+                'Insurance': inputs.insurance,
+                'Repairs': repairsAmount,
+                'Management': managementAmount,
+                'Other': inputs.otherExpenses,
+            });
+            updateCashFlowChart(monthlyCashFlow, operatingExpenses, inputs.grossMonthlyRent);
+            updateLoanBalanceChart(loanAmount, inputs.interestRate, inputs.loanTerm);
+        }
+
+        // --- Chart Update Functions ---
+
+        /**
+         * Initializes and updates the expense breakdown doughnut chart.
+         * @param {object} expenseData - An object with expense categories as keys and amounts as values.
+         */
+        function updateExpenseChart(expenseData) {
+            const ctx = document.getElementById('expenseBreakdownChart').getContext('2d');
+            const labels = Object.keys(expenseData);
+            const data = Object.values(expenseData);
+
+            if (charts.expense) {
+                charts.expense.data.labels = labels;
+                charts.expense.data.datasets[0].data = data;
+                charts.expense.update();
+            } else {
+                charts.expense = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Monthly Expenses',
+                            data: data,
+                            backgroundColor: ['#4f46e5', '#7c3aed', '#db2777', '#f59e0b', '#10b981', '#3b82f6', '#6b7280'],
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.label}: ${formatCurrency(context.raw)}`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        /**
+         * Updates the 30-year cash flow projection bar chart.
+         */
+        function updateCashFlowChart(initialCashFlow, initialOpEx, initialRent) {
+            const ctx = document.getElementById('cashFlowChart').getContext('2d');
+            const years = Array.from({ length: 30 }, (_, i) => `Year ${i + 1}`);
+            const cashFlowData = [];
+            let currentAnnualCashFlow = initialCashFlow * 12;
+
+            for (let i = 0; i < 30; i++) {
+                cashFlowData.push(currentAnnualCashFlow);
+                // Assume 3% annual rent increase and 2% expense increase
+                currentAnnualCashFlow = currentAnnualCashFlow * 1.03 - (initialOpEx * 12 * 0.02);
+            }
+
+            if (charts.cashFlow) {
+                charts.cashFlow.data.datasets[0].data = cashFlowData;
+                charts.cashFlow.update();
+            } else {
+                charts.cashFlow = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Projected Annual Cash Flow',
+                            data: cashFlowData,
+                            backgroundColor: '#4f46e5',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { ticks: { callback: (value) => formatCurrency(value) } },
+                            x: { ticks: { maxRotation: 90, minRotation: 45 } }
+                        },
+                        plugins: {
+                            tooltip: { callbacks: { label: (c) => formatCurrency(c.raw) } }
+                        }
+                    }
+                });
+            }
+        }
+        
+        /**
+         * Updates the loan amortization line chart.
+         */
+        function updateLoanBalanceChart(loanAmount, annualRate, years) {
+            const ctx = document.getElementById('loanBalanceChart').getContext('2d');
+            const balanceData = [];
+            let remainingBalance = loanAmount;
+            const monthlyRate = annualRate / 100 / 12;
+            const numPayments = years * 12;
+            const monthlyPayment = calculateMortgagePayment(loanAmount, annualRate, years);
+            
+            for (let i = 0; i <= numPayments; i++) {
+                if (i % 12 === 0) { // Record balance annually
+                    balanceData.push(remainingBalance);
+                }
+                const interestPayment = remainingBalance * monthlyRate;
+                const principalPayment = monthlyPayment - interestPayment;
+                remainingBalance -= principalPayment;
+            }
+
+            if (charts.loan) {
+                charts.loan.data.datasets[0].data = balanceData;
+                charts.loan.update();
+            } else {
+                charts.loan = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({ length: years + 1 }, (_, i) => `Year ${i}`),
+                        datasets: [{
+                            label: 'Loan Balance',
+                            data: balanceData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { ticks: { callback: (value) => formatCurrency(value) } }
+                        },
+                        plugins: {
+                            tooltip: { callbacks: { label: (c) => formatCurrency(c.raw) } }
+                        }
+                    }
+                });
+            }
+        }
+
+
+        // --- Event Listener ---
+        // A single event listener on the form for efficiency.
+        // It triggers recalculation on any input change.
+        elements.form.addEventListener('input', calculateAndDisplay);
+
+        // --- Initial Calculation ---
+        // Run the calculation once on page load to populate the initial values.
+        document.addEventListener('DOMContentLoaded', calculateAndDisplay);
+
+    </script>
+</body>
+</html>
