@@ -7,7 +7,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:init": "psql -U postgres -c \"CREATE DATABASE real_estate_portfolio;\" && psql -U postgres -d real_estate_portfolio -f db/database.sql"
+    "db:init": "sh -c 'psql -U $DB_USER -h $DB_HOST -p $DB_PORT -tc \"SELECT 1 FROM pg_database WHERE datname=\'$DB_DATABASE\'\" | grep -q 1 || psql -U $DB_USER -h $DB_HOST -p $DB_PORT -c \"CREATE DATABASE $DB_DATABASE\"' && psql -U $DB_USER -h $DB_HOST -p $DB_PORT -d $DB_DATABASE -f db/database.sql",
+    "db:migrate": "psql -U $DB_USER -h $DB_HOST -p $DB_PORT -d $DB_DATABASE -f db/database.sql"
   },
   "dependencies": {
     "cors": "^2.8.5",
