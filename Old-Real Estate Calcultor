@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Real Estate Calculator</title>
+    <style>
+        body {
+            background-color: lightblue;
+        }
+
+        .slider {
+            width: 100%;
+        }
+
+        .value-display {
+            margin-left: 10px;
+        }
+
+        .output-container {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+        <form method="post">
+        <!-- Purchase Information -->
+        <fieldset>
+            <legend>Purchase Information</legend>
+            <!-- Purchase Price -->
+            <label for="purchase_price">Purchase Price ($): <span id="purchase_price_display" class="value-display">1395000</span></label><br>
+            <input type="range" id="purchase_price_slider" min="0" max="5000000" step="50000" value="1395000" oninput="syncInput('purchase_price', this.value)">
+            <input type="number" id="purchase_price" name="purchase_price" min="0" step="0.01" value="1395000" oninput="syncSlider('purchase_price', this.value)"><br>
+
+            <!-- Down Payment -->
+            <label for="down_payment">Down Payment ($): <span id="down_payment_display" class="value-display">0</span></label><br>
+            <input type="range" id="down_payment_slider" min="0" max="500000" step="10000" value="0" oninput="syncInput('down_payment', this.value)">
+            <input type="number" id="down_payment" name="down_payment" min="0" step="0.01" value="0" oninput="syncSlider('down_payment', this.value)"><br>
+
+            <!-- Closing Cost -->
+            <label for="closing_cost">Closing Cost ($): <span id="closing_cost_display" class="value-display">0</span></label><br>
+            <input type="range" id="closing_cost_slider" min="0" max="100000" step="1000" value="0" oninput="syncInput('closing_cost', this.value)">
+            <input type="number" id="closing_cost" name="closing_cost" min="0" step="0.01" value="0" oninput="syncSlider('closing_cost', this.value)"><br>
+
+            <!-- Other Initial Costs -->
+            <label for="other_initial_cost">Other Initial Costs ($): <span id="other_initial_cost_display" class="value-display">66000</span></label><br>
+            <input type="range" id="other_initial_cost_slider" min="0" max="100000" step="1000" value="66000" oninput="syncInput('other_initial_cost', this.value)">
+            <input type="number" id="other_initial_cost" name="other_initial_cost" min="0" step="0.01" value="66000" oninput="syncSlider('other_initial_cost', this.value)"><br>
+
+            <!-- Interest Rate -->
+            <label for="interest_rate">Interest Rate (%): <span id="interest_rate_display" class="value-display">2.625</span></label><br>
+            <input type="range" id="interest_rate_slider" min="0" max="10" step="0.125" value="2.625" oninput="syncInput('interest_rate', this.value)">
+            <input type="number" id="interest_rate" name="interest_rate" min="0" step="0.01" value="2.625" oninput="syncSlider('interest_rate', this.value)"><br>
+
+            <!-- Loan Term -->
+            <label for="loan_term">Loan Term (years): <span id="loan_term_display" class="value-display">30</span></label><br>
+            <input type="range" id="loan_term_slider" min="1" max="30" step="1" value="30" oninput="syncInput('loan_term', this.value)">
+            <input type="number" id="loan_term" name="loan_term" min="1" max="30" value="30" oninput="syncSlider('loan_term', this.value)"><br>
+        </fieldset>
+
+        <!-- Expenses Information -->
+        <fieldset>
+            <legend>Expenses Information</legend>
+
+            <!-- Vacancy Rate -->
+            <label for="vacancy_rate">Vacancy Rate (% monthly): <span id="vacancy_rate_display" class="value-display">5.5</span></label><br>
+            <input type="range" id="vacancy_rate_slider" min="0" max="100" step="0.01" value="5.5" oninput="syncInput('vacancy_rate', this.value)">
+            <input type="number" id="vacancy_rate" name="vacancy_rate" min="0" max="100" step="0.01" value="5.5" oninput="syncSlider('vacancy_rate', this.value)"><br>
+
+            <!-- Repairs and Maintenance -->
+            <label for="repairs_maintenance">Repairs and Maintenance ($ monthly): <span id="repairs_maintenance_display" class="value-display">300</span></label><br>
+            <input type="range" id="repairs_maintenance_slider" min="0" max="5000" step="100" value="300" oninput="syncInput('repairs_maintenance', this.value)">
+            <input type="number" id="repairs_maintenance" name="repairs_maintenance" min="0" step="0.01" value="300" oninput="syncSlider('repairs_maintenance', this.value)"><br>
+
+            <!-- Property Management -->
+            <label for="property_management">Property Management (% monthly): <span id="property_management_display" class="value-display">0</span></label><br>
+            <input type="range" id="property_management_slider" min="0" max="100" step="0.01" value="0" oninput="syncInput('property_management', this.value)">
+            <input type="number" id="property_management" name="property_management" min="0" max="100" step="0.01" value="0" oninput="syncSlider('property_management', this.value)"><br>
+
+            <!-- Property Taxes -->
+            <label for="taxes">Property Taxes ($ yearly): <span id="taxes_display" class="value-display">15000</span></label><br>
+            <input type="range" id="taxes_slider" min="0" max="50000" step="1000" value="15000" oninput="syncInput('taxes', this.value)">
+            <input type="number" id="taxes" name="taxes" min="0" step="0.01" value="15000" oninput="syncSlider('taxes', this.value)"><br>
+
+            <!-- Insurance -->
+            <label for="insurance">Insurance ($ yearly): <span id="insurance_display" class="value-display">2200</span></label><br>
+            <input type="range" id="insurance_slider" min="0" max="10000" step="100" value="2200" oninput="syncInput('insurance', this.value)">
+            <input type="number" id="insurance" name="insurance" min="0" step="0.01" value="2200" oninput="syncSlider('insurance', this.value)"><br>
+
+            <!-- Utilities -->
+            <label for="utilities">Utilities ($ monthly): <span id="utilities_display" class="value-display">300</span></label><br>
+            <input type="range" id="utilities_slider" min="0" max="2000" step="50" value="300" oninput="syncInput('utilities', this.value)">
+            <input type="number" id="utilities" name="utilities" min="0" step="0.01" value="300" oninput="syncSlider('utilities', this.value)"><br>
+
+            <!-- Other Expenses -->
+            <label for="other_expenses">Other ($ monthly): <span id="other_expenses_display" class="value-display">60</span></label><br>
+            <input type="range" id="other_expenses_slider" min="0" max="5000" step="50" value="60" oninput="syncInput('other_expenses', this.value)">
+            <input type="number" id="other_expenses" name="other_expenses" min="0" step="0.01" value="60" oninput="syncSlider('other_expenses', this.value)"><br>
+        </fieldset>
+
+        <!-- Rental Information -->
+        <fieldset>
+            <legend>Rental Information</legend>
+
+            <!-- Unit #1 Rent -->
+            <label for="unit1_rent">Unit #1 Rent: <span id="unit1_rent_display" class="value-display">1750</span></label><br>
+            <input type="range" id="unit1_rent_slider" min="0" max="5000" step="50" value="1750" oninput="syncInput('unit1_rent', this.value)">
+            <input type="number" id="unit1_rent" name="unit1_rent" min="0" step="0.01" value="1750" oninput="syncSlider('unit1_rent', this.value)"><br>
+
+            <!-- Unit #2 Rent -->
+            <label for="unit2_rent">Unit #2 Rent: <span id="unit2_rent_display" class="value-display">1700</span></label><br>
+            <input type="range" id="unit2_rent_slider" min="0" max="5000" step="50" value="1700" oninput="syncInput('unit2_rent', this.value)">
+            <input type="number" id="unit2_rent" name="unit2_rent" min="0" step="0.01" value="1700" oninput="syncSlider('unit2_rent', this.value)"><br>
+
+            <!-- Unit #3 Rent -->
+            <label for="unit3_rent">Unit #3 Rent: <span id="unit3_rent_display" class="value-display">1660</span></label><br>
+            <input type="range" id="unit3_rent_slider" min="0" max="5000" step="50" value="1660" oninput="syncInput('unit3_rent', this.value)">
+            <input type="number" id="unit3_rent" name="unit3_rent" min="0" step="0.01" value="1660" oninput="syncSlider('unit3_rent', this.value)"><br>
+
+            <!-- Unit #4 Rent -->
+            <label for="unit4_rent">Unit #4 Rent: <span id="unit4_rent_display" class="value-display">2200</span></label><br>
+            <input type="range" id="unit4_rent_slider" min="0" max="5000" step="50" value="2200" oninput="syncInput('unit4_rent', this.value)">
+            <input type="number" id="unit4_rent" name="unit4_rent" min="0" step="0.01" value="2200" oninput="syncSlider('unit4_rent', this.value)"><br>
+
+        </fieldset>
+        <br>
+
+        <button type="button" onclick="calculate()">Calculate</button>
+
+    </form>
+
+    <!-- output values: -->
+    <div class="output-container">
+        <h2>Initial Costs</h2>
+        <div class="row">
+            <div class="column">
+                <label for="initial_cost_purchase_price">Purchase Price</label><br>
+                <input type="text" id="initial_cost_purchase_price" name="initial_cost_purchase_price" readonly><br>
+
+                <label for="initial_cost_down_payment">Down Payment</label><br>
+                <input type="text" id="initial_cost_down_payment" name="initial_cost_down_payment" readonly><br>
+
+                <label for="initial_cost_closing_cost">Closing Cost</label><br>
+                <input type="text" id="initial_cost_closing_cost" name="initial_cost_closing_cost" readonly><br>
+
+                <label for="initial_cost_other">Other Initial Costs</label><br>
+                <input type="text" id="initial_cost_other" name="initial_cost_other" readonly><br>
+
+                <label for="total_initial_cost">Total Initial Cost</label><br>
+                <input type="text" id="total_initial_cost" name="total_initial_cost" readonly><br>
+            </div>
+        </div>
+
+        <h2>Monthly Expenses</h2>
+        <div class="row">
+            <div class="column">
+                <label for="monthly_expense_loan_payment">Loan Payment</label><br>
+                <input type="text" id="monthly_expense_loan_payment" name="monthly_expense_loan_payment" readonly><br>
+
+                <label for="monthly_expense_vacancy_loss">Vacancy Loss</label><br>
+                <input type="text" id="monthly_expense_vacancy_loss" name="monthly_expense_vacancy_loss" readonly><br>
+
+                <label for="monthly_expense_repairs_and_maintenance">Repairs and Maintenance</label><br>
+                <input type="text" id="monthly_expense_repairs_and_maintenance" name="monthly_expense_repairs_and_maintenance" readonly><br>
+
+                <label for="monthly_expense_property_management_fee">Property Management Fee</label><br>
+                <input type="text" id="monthly_expense_property_management_fee" name="monthly_expense_property_management_fee" readonly><br>
+
+                <label for="monthly_expense_taxes">Property Taxes</label><br>
+                <input type="text" id="monthly_expense_taxes" name="monthly_expense_taxes" readonly><br>
+
+                <label for="monthly_expense_insurance">Insurance</label><br>
+                <input type="text" id="monthly_expense_insurance" name="monthly_expense_insurance" readonly><br>
+
+                <label for="monthly_expense_utilities">Utilities</label><br>
+                <input type="text" id="monthly_expense_utilities" name="monthly_expense_utilities" readonly><br>
+
+                <label for="monthly_expense_other">Other Expenses</label><br>
+                <input type="text" id="monthly_expense_other" name="monthly_expense_other" readonly><br>
+
+                <label for="total_monthly_expenses">Total Monthly Expenses</label><br>
+                <input type="text" id="total_monthly_expenses" name="total_monthly_expenses" readonly><br>
+            </div>
+        </div>
+
+        <h2>Performance Metrics</h2>
+        <div class="row">
+            <div class="column">
+                <label for="yearly_net_income">Yearly Net Income</label><br>
+                <input type="text" id="yearly_net_income" name="yearly_net_income" readonly><br>
+
+                <label for="roi">ROI</label><br>
+                <input type="text" id="roi" name="roi" readonly><br>
+
+                <label for="cap_rate">Cap Rate</label><br>
+                <input type="text" id="cap_rate" name="cap_rate" readonly><br>
+
+                <label for="noi">NOI</label><br>
+                <input type="text" id="noi" name="noi" readonly><br>
+
+                <label for="grm">GRM</label><br>
+                <input type="text" id="grm" name="grm" readonly><br>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas for Chart.js -->
+
+    <!-- 1. Cash Flow Projection Chart -->
+    <canvas id="cashFlowProjectionChart" width="400" height="200"></canvas>
+
+    <!-- 2. Cap Rate Trend Chart -->
+    <canvas id="capRateTrendChart" width="400" height="200"></canvas>
+
+    <!-- 3. Break-Even Point Chart -->
+    <canvas id="breakEvenChart" width="400" height="200"></canvas>
+
+    <!-- 4. Property Value Appreciation Chart -->
+    <canvas id="propertyValueChart" width="400" height="200"></canvas>
+
+    <!-- 5. Loan Balance Over Time Chart -->
+    <canvas id="loanBalanceChart" width="400" height="200"></canvas>
+    <!-- 6. Expense Breakdown Pie Chart -->
+    <canvas id="expenseBreakdownChart" width="400" height="200"></canvas>
+
+    <!-- 7. Rent Increase Trend Chart -->
+    <canvas id="rentIncreaseChart" width="400" height="200"></canvas>
+
+    <!-- 8. NOI Growth Chart -->
+    <canvas id="noiGrowthChart" width="400" height="200"></canvas>
+
+    <!-- 9. Cash on Cash Return Chart -->
+    <canvas id="cashOnCashReturnChart" width="400" height="200"></canvas>
+
+    <!-- 10. Debt Service Coverage Ratio (DSCR) Chart -->
+    <canvas id="dscrChart" width="400" height="200"></canvas>
+
+    <!-- scripts for charts, calc -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="calculator.js"></script>
+
+    <script>
+        function syncInput(id, value) {
+            document.getElementById(id).value = value;
+            document.getElementById(id + "_display").innerText = value;
+            calculate(); // Recalculate values when slider changes
+        }
+
+        function syncSlider(id, value) {
+            document.getElementById(id + "_slider").value = value;
+            document.getElementById(id + "_display").innerText = value;
+            calculate(); // Recalculate values when input changes
+        }
+
+        function calculate() {
+            // get input values
+            const purchasePrice = Number(document.getElementById("purchase_price").value);
+            const downPayment = Number(document.getElementById("down_payment").value);
+            const closingCost = Number(document.getElementById("closing_cost").value);
+            const otherInitialCost = Number(document.getElementById("other_initial_cost").value);
+            const interestRate = Number(document.getElementById("interest_rate").value) / 100;
+            const loanTerm = Number(document.getElementById("loan_term").value) * 12;
+            const vacancyRate = Number(document.getElementById("vacancy_rate").value) / 100;
+            const repairsMaintenance = Number(document.getElementById("repairs_maintenance").value);
+            const propertyManagement = Number(document.getElementById("property_management").value) / 100;
+            const taxes = Number(document.getElementById("taxes").value);
+            const insurance = Number(document.getElementById("insurance").value);
+            const utilities = Number(document.getElementById("utilities").value);
+            const otherExpenses = Number(document.getElementById("other_expenses").value);
+            const unit1Rent = Number(document.getElementById("unit1_rent").value);
+            const unit2Rent = Number(document.getElementById("unit2_rent").value);
+            const unit3Rent = Number(document.getElementById("unit3_rent").value);
+            const unit4Rent = Number(document.getElementById("unit4_rent").value);
+
+            // Calculate initial cost
+            var initialCostPurchasePrice = purchasePrice;
+            var initialCostDownPayment = downPayment;
+            var initialCostClosingCost = closingCost;
+            var initialCostOther = otherInitialCost;
+            var totalInitialCost = purchasePrice + closingCost + otherInitialCost;
+
+            // Calculate monthly expenses
+            var monthlyExpenseLoanPayment = calculateLoanPayment(purchasePrice - downPayment, interestRate / 12, loanTerm);
+            var monthlyExpenseVacancyLoss = calculateVacancyLoss(unit1Rent, unit2Rent, unit3Rent, unit4Rent, vacancyRate);
+            var monthlyExpenseRepairsMaintenance = repairsMaintenance;
+            var monthlyExpensePropertyManagementFee = calculatePropertyManagementFee(unit1Rent, unit2Rent, unit3Rent, unit4Rent, propertyManagement);
+            var monthlyExpenseTaxes = taxes / 12;
+            var monthlyExpenseInsurance = insurance / 12;
+            var monthlyExpenseUtilities = utilities;
+            var monthlyExpenseOther = otherExpenses;
+            var totalMonthlyExpenses = monthlyExpenseLoanPayment + monthlyExpenseVacancyLoss + monthlyExpenseRepairsMaintenance + monthlyExpensePropertyManagementFee + monthlyExpenseTaxes + monthlyExpenseInsurance + monthlyExpenseUtilities + monthlyExpenseOther;
+
+            // Calculate Performance Metrics
+            var grossRentalIncome = unit1Rent + unit2Rent + unit3Rent + unit4Rent;
+            var effectiveRentalIncome = grossRentalIncome * (1 - vacancyRate);
+            var grossIncome = effectiveRentalIncome;
+            var operatingExpense = monthlyExpenseLoanPayment + monthlyExpenseVacancyLoss + monthlyExpenseRepairsMaintenance + monthlyExpensePropertyManagementFee + monthlyExpenseTaxes + monthlyExpenseInsurance + monthlyExpenseUtilities + monthlyExpenseOther;
+            var netIncome = grossIncome - operatingExpense;
+            var yearlyNetIncome = netIncome * 12;
+            var roi = yearlyNetIncome / totalInitialCost * 100;
+            var capRate = (yearlyNetIncome / purchasePrice) * 100;
+            var noi = (grossIncome - (operatingExpense - monthlyExpenseLoanPayment)) * 12;
+            var grm = purchasePrice / (grossRentalIncome * 12);
+
+            // display output values
+
+            //initial cost 
+            document.getElementById("initial_cost_purchase_price").value = formatCurrency(initialCostPurchasePrice);
+            document.getElementById("initial_cost_down_payment").value = formatCurrency(initialCostDownPayment);
+            document.getElementById("initial_cost_closing_cost").value = formatCurrency(initialCostClosingCost);
+            document.getElementById("initial_cost_other").value = formatCurrency(initialCostOther);
+            document.getElementById("total_initial_cost").value = formatCurrency(totalInitialCost);
+
+            //monthly cost  
+            document.getElementById("monthly_expense_loan_payment").value = formatCurrency(monthlyExpenseLoanPayment);
+            document.getElementById("monthly_expense_vacancy_loss").value = formatCurrency(monthlyExpenseVacancyLoss);
+            document.getElementById("monthly_expense_repairs_and_maintenance").value = formatCurrency(monthlyExpenseRepairsMaintenance);
+            document.getElementById("monthly_expense_property_management_fee").value = formatCurrency(monthlyExpensePropertyManagementFee);
+            document.getElementById("monthly_expense_taxes").value = formatCurrency(monthlyExpenseTaxes);
+            document.getElementById("monthly_expense_insurance").value = formatCurrency(monthlyExpenseInsurance);
+            document.getElementById("monthly_expense_utilities").value = formatCurrency(monthlyExpenseUtilities);
+            document.getElementById("monthly_expense_other").value = formatCurrency(monthlyExpenseOther);
+            document.getElementById("total_monthly_expenses").value = formatCurrency(totalMonthlyExpenses);
+
+            //add performance metrics 
+            document.getElementById("yearly_net_income").value = formatCurrency(yearlyNetIncome);
+            document.getElementById("roi").value = roi.toFixed(2) + '%';
+            document.getElementById("cap_rate").value = capRate.toFixed(2) + '%';
+            document.getElementById("noi").value = formatCurrency(noi);
+            document.getElementById("grm").value = grm.toFixed(2);
+
+            // supporting functions for calculations     
+
+            function calculateLoanPayment(amount, interest_rate, term) {
+                var rate = interest_rate;
+                var payment = amount * rate / (1 - Math.pow(1 + rate, -term));
+                return payment;
+            }
+
+            function calculateVacancyLoss(rent1, rent2, rent3, rent4, vacancy_rate) {
+                var total_rent = rent1 + rent2 + rent3 + rent4;
+                var vacancy_loss = total_rent * vacancy_rate;
+                return vacancy_loss;
+            }
+
+            function calculatePropertyManagementFee(rent1, rent2, rent3, rent4, management_fee) {
+                var total_rent = rent1 + rent2 + rent3 + rent4;
+                var property_management_fee = total_rent * management_fee;
+                return property_management_fee;
+            }
+
+            function formatCurrency(amount) {
+                var formatter = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+                return formatter.format(amount);
+            }
+
+            function numberWithCommas(x) {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            //calculations for charts.... 
+
+            function updateCashFlowProjectionChart() {
+                const ctx = document.getElementById('cashFlowProjectionChart').getContext('2d');
+                let cashFlows = [];
+                let years = Array.from({
+                    length: 30
+                }, (_, i) => i + 1);
+                let currentIncome = grossIncome * 12;
+                let currentExpenses = operatingExpense * 12;
+
+                years.forEach(year => {
+                    let projectedIncome = currentIncome * Math.pow(1.03, year); // 3% growth per year
+                    let projectedExpenses = currentExpenses * Math.pow(1.02, year); // 2% growth per year
+                    cashFlows.push(projectedIncome - projectedExpenses);
+                });
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Annual Cash Flow',
+                            data: cashFlows,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                callback: function(value, index, values) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '$' + tooltipItem.yLabel.toLocaleString();
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateCapRateTrendChart() {
+                const ctx = document.getElementById('capRateTrendChart').getContext('2d');
+                let capRates = [];
+                let years = Array.from({
+                    length: 30
+                }, (_, i) => i + 1);
+
+                years.forEach(year => {
+                    let projectedNOI = noi * Math.pow(1.03, year); // 3% growth per year
+                    let projectedValue = purchasePrice * Math.pow(1.04, year); // 4% appreciation per year
+                    capRates.push((projectedNOI / projectedValue) * 100);
+                });
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Cap Rate (%)',
+                            data: capRates,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                callback: function(value, index, values) {
+                                    return value.toFixed(2) + '%';
+                                }
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += tooltipItem.yLabel.toFixed(2) + '%';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateBreakEvenChart() {
+                const ctx = document.getElementById('breakEvenChart').getContext('2d');
+
+                let years = [];
+                let cumulativeIncome = [];
+                let cumulativeExpenses = [];
+                let totalCumulativeIncome = 0;
+                let totalExpenses = totalInitialCost;
+                let annualAppreciationRate = 0.03; // Assume 3% annual appreciation
+                let currentPropertyValue = purchasePrice;
+                let breakEvenYear = 0;
+
+                for (let year = 1; year <= 30; year++) { // Example: 30 years projection
+                    // Calculate property appreciation
+                    currentPropertyValue *= (1 + annualAppreciationRate);
+
+                    // Annual effective rental income (after vacancy rate)
+                    let annualEffectiveRentalIncome = (unit1Rent + unit2Rent + unit3Rent + unit4Rent) * 12 * (1 - vacancyRate);
+
+                    // Add yearly income and appreciation
+                    totalCumulativeIncome += annualEffectiveRentalIncome + (currentPropertyValue - currentPropertyValue / (1 + annualAppreciationRate));
+                    cumulativeIncome.push(totalCumulativeIncome);
+
+                    // Add yearly operational expenses
+                    totalExpenses += operatingExpense * 12;
+                    cumulativeExpenses.push(totalExpenses);
+
+                    // Identify break-even point
+                    if (totalCumulativeIncome >= totalExpenses && breakEvenYear === 0) {
+                        breakEvenYear = year;
+                    }
+
+                    years.push(year);
+                }
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                                label: 'Cumulative Income',
+                                data: cumulativeIncome,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1,
+                                fill: false
+                            },
+                            {
+                                label: 'Cumulative Expenses',
+                                data: cumulativeExpenses,
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                callback: function(value, index, values) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        elements: {
+                            point: {
+                                radius: context => context.dataIndex === breakEvenYear - 1 ? 5 : 0 // Highlight break-even point
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.dataIndex === breakEvenYear - 1) {
+                                            return context.dataset.label + ': ' + '$' + context.parsed.y.toLocaleString() + ' (Break-even)';
+                                        }
+                                        return context.dataset.label + ': ' + '$' + context.parsed.y.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updatePropertyValueChart() {
+                const ctx = document.getElementById('propertyValueChart').getContext('2d');
+                let propertyValues = [];
+                let years = Array.from({
+                    length: 30
+                }, (_, i) => i + 1);
+                let currentValue = purchasePrice;
+
+                years.forEach(year => {
+                    let projectedValue = currentValue * Math.pow(1.04, year); // 4% appreciation per year
+                    propertyValues.push(projectedValue);
+                });
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Property Value',
+                            data: propertyValues,
+                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                callback: function(value, index, values) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '$' + tooltipItem.yLabel.toLocaleString();
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateLoanBalanceChart() {
+                const ctx = document.getElementById('loanBalanceChart').getContext('2d');
+                let loanBalances = [];
+                let years = Array.from({
+                    length: loanTerm / 12
+                }, (_, i) => i + 1);
+                let currentBalance = purchasePrice - downPayment;
+
+                years.forEach(year => {
+                    let interestPaid = currentBalance * (interestRate / 12);
+                    let principalPaid = monthlyExpenseLoanPayment - interestPaid;
+                    currentBalance -= principalPaid * 12;
+                    loanBalances.push(currentBalance > 0 ? currentBalance : 0);
+                });
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Remaining Loan Balance',
+                            data: loanBalances,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                callback: function(value, index, values) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '$' + tooltipItem.yLabel.toLocaleString();
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateExpenseBreakdownChart() {
+                const ctx = document.getElementById('expenseBreakdownChart').getContext('2d');
+                let expenses = [monthlyExpenseRepairsMaintenance * 12, monthlyExpensePropertyManagementFee * 12, taxes, insurance, monthlyExpenseUtilities * 12, monthlyExpenseOther * 12];
+
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Repairs & Maintenance', 'Property Management', 'Taxes', 'Insurance', 'Utilities', 'Other'],
+                        datasets: [{
+                            label: 'Expense Breakdown',
+                            data: expenses,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(54, 162, 235, 0.5)',
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(75, 192, 192, 0.5)',
+                                'rgba(153, 102, 255, 0.5)',
+                                'rgba(255, 159, 64, 0.5)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var dataset = data.datasets[tooltipItem.datasetIndex];
+                                    var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                                        return previousValue + currentValue;
+                                    });
+                                    var currentValue = dataset.data[tooltipItem.index];
+                                    var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                                    return data.labels[tooltipItem.index] + ': ' + '$' + currentValue.toLocaleString() + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateRentIncreaseChart() {
+                const ctx = document.getElementById('rentIncreaseChart').getContext('2d');
+                let annualRents = [];
+                let years = Array.from({
+                    length: 30
+                }, (_, i) => i + 1);
+                let currentRent = unit1Rent + unit2Rent + unit3Rent + unit4Rent;
+
+                years.forEach(year => {
+                    let projectedRent = currentRent * Math.pow(1.03, year); // 3% increase per year
+                    annualRents.push(projectedRent);
+                });
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Annual Rent',
+                            data: annualRents,
+                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                callback: function(value, index, values) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '$' + tooltipItem.yLabel.toLocaleString();
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateNOIGrowthChart() {
+                const ctx = document.getElementById('noiGrowthChart').getContext('2d');
+                let noiValues = [];
+                let years = Array.from({
+                    length: 30
+                }, (_, i) => i + 1);
+
+                years.forEach(year => {
+                    let projectedNOI = noi * Math.pow(1.03, year); // 3% NOI growth per year
+                    noiValues.push(projectedNOI);
+                });
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Net Operating Income (NOI)',
+                            data: noiValues,
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                callback: function(value, index, values) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += '$' + tooltipItem.yLabel.toLocaleString();
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateCashOnCashReturnChart() {
+                const ctx = document.getElementById('cashOnCashReturnChart').getContext('2d');
+                let cashOnCashReturns = [];
+                let years = Array.from({
+                    length: 30
+                }, (_, i) => i + 1);
+
+                years.forEach(year => {
+                    let yearlyIncome = netIncome * 12;
+                    let cashOnCashReturn = (yearlyIncome / totalInitialCost) * 100;
+                    cashOnCashReturns.push(cashOnCashReturn);
+                });
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Cash on Cash Return (%)',
+                            data: cashOnCashReturns,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                callback: function(value, index, values) {
+                                    return value.toFixed(2) + '%';
+                                }
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += tooltipItem.yLabel.toFixed(2) + '%';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateDSCRChart() {
+                const ctx = document.getElementById('dscrChart').getContext('2d');
+                let dscrValues = [];
+                let years = Array.from({
+                    length: 30
+                }, (_, i) => i + 1);
+
+                years.forEach(year => {
+                    let yearlyNOI = noi * Math.pow(1.03, year); // 3% NOI growth per year
+                    let dscr = yearlyNOI / (monthlyExpenseLoanPayment * 12);
+                    dscrValues.push(dscr);
+                });
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [{
+                            label: 'Debt Service Coverage Ratio (DSCR)',
+                            data: dscrValues,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += tooltipItem.yLabel.toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Function calls to update each chart
+            updateCashFlowProjectionChart();
+            updateCapRateTrendChart();
+            updateBreakEvenChart();
+            updatePropertyValueChart();
+            updateLoanBalanceChart();
+            updateExpenseBreakdownChart();
+            updateRentIncreaseChart();
+            updateNOIGrowthChart();
+            updateCashOnCashReturnChart();
+            updateDSCRChart();
+        }
+    </script>
+</body>
+
+</html>
+
+
+//combine with the second html below:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Real Estate Investment Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .output-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .output-group {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Advanced Real Estate Investment Calculator</h1>
+    
+    <form id="investmentForm">
+        <div class="input-section">
+            <div>
+                <h2>Property Details</h2>
+                <div class="input-group">
+                    <label for="purchasePrice">Purchase Price ($):</label>
+                    <input type="number" id="purchasePrice" name="purchasePrice" value="1395000" required>
+                </div>
+                <div class="input-group">
+                    <label for="propertyType">Property Type:</label>
+                    <select id="propertyType" name="propertyType">
+                        <option value="singleFamily">Single Family</option>
+                        <option value="multiFamily" selected>Multi-Family</option>
+                        <option value="commercial">Commercial</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" value="Urban Center">
+                </div>
+                <div class="input-group">
+                    <label for="squareFootage">Square Footage:</label>
+                    <input type="number" id="squareFootage" name="squareFootage" value="4000">
+                </div>
+            </div>
+            
+            <div>
+                <h2>Financial Details</h2>
+                <div class="input-group">
+                    <label for="downPayment">Down Payment ($):</label>
+                    <input type="number" id="downPayment" name="downPayment" value="279000" required>
+                </div>
+                <div class="input-group">
+                    <label for="interestRate">Interest Rate (%):</label>
+                    <input type="number" id="interestRate" name="interestRate" value="2.625" step="0.125" required>
+                </div>
+                <div class="input-group">
+                    <label for="loanTerm">Loan Term (years):</label>
+                    <input type="number" id="loanTerm" name="loanTerm" value="30" required>
+                </div>
+                <div class="input-group">
+                    <label for="closingCosts">Closing Costs ($):</label>
+                    <input type="number" id="closingCosts" name="closingCosts" value="13950" required>
+                </div>
+            </div>
+            
+            <div>
+                <h2>Income</h2>
+                <div class="input-group">
+                    <label for="monthlyRent">Total Monthly Rent ($):</label>
+                    <input type="number" id="monthlyRent" name="monthlyRent" value="7310" required>
+                </div>
+                <div class="input-group">
+                    <label for="otherIncome">Other Monthly Income ($):</label>
+                    <input type="number" id="otherIncome" name="otherIncome" value="0">
+                </div>
+                <div class="input-group">
+                    <label for="vacancyRate">Vacancy Rate (%):</label>
+                    <input type="number" id="vacancyRate" name="vacancyRate" value="5.5" step="0.1" required>
+                </div>
+            </div>
+            
+            <div>
+                <h2>Expenses</h2>
+                <div class="input-group">
+                    <label for="propertyTax">Annual Property Tax ($):</label>
+                    <input type="number" id="propertyTax" name="propertyTax" value="15000" required>
+                </div>
+                <div class="input-group">
+                    <label for="insurance">Annual Insurance ($):</label>
+                    <input type="number" id="insurance" name="insurance" value="2200" required>
+                </div>
+                <div class="input-group">
+                    <label for="maintenance">Monthly Maintenance ($):</label>
+                    <input type="number" id="maintenance" name="maintenance" value="300" required>
+                </div>
+                <div class="input-group">
+                    <label for="utilities">Monthly Utilities ($):</label>
+                    <input type="number" id="utilities" name="utilities" value="300" required>
+                </div>
+                <div class="input-group">
+                    <label for="propertyManagement">Property Management (% of rent):</label>
+                    <input type="number" id="propertyManagement" name="propertyManagement" value="0" step="0.1" required>
+                </div>
+            </div>
+            
+            <div>
+                <h2>Growth Assumptions</h2>
+                <div class="input-group">
+                    <label for="appreciationRate">Annual Property Appreciation (%):</label>
+                    <input type="number" id="appreciationRate" name="appreciationRate" value="3" step="0.1" required>
+                </div>
+                <div class="input-group">
+                    <label for="rentGrowthRate">Annual Rent Increase (%):</label>
+                    <input type="number" id="rentGrowthRate" name="rentGrowthRate" value="2" step="0.1" required>
+                </div>
+                <div class="input-group">
+                    <label for="expenseGrowthRate">Annual Expense Increase (%):</label>
+                    <input type="number" id="expenseGrowthRate" name="expenseGrowthRate" value="2" step="0.1" required>
+                </div>
+            </div>
+        </div>
+        
+        <button type="button" onclick="calculateInvestment()">Calculate Investment</button>
+    </form>
+
+    <div class="output-section" id="outputSection" style="display:none;">
+        <div class="output-group">
+            <h2>Initial Investment</h2>
+            <p>Total Initial Investment: <span id="totalInitialInvestment"></span></p>
+            <p>Loan Amount: <span id="loanAmount"></span></p>
+        </div>
+        
+        <div class="output-group">
+            <h2>Monthly Financials</h2>
+            <p>Gross Monthly Income: <span id="grossMonthlyIncome"></span></p>
+            <p>Monthly Expenses: <span id="monthlyExpenses"></span></p>
+            <p>Monthly Cash Flow: <span id="monthlyCashFlow"></span></p>
+        </div>
+        
+        <div class="output-group">
+            <h2>Annual Financials</h2>
+            <p>Gross Annual Income: <span id="grossAnnualIncome"></span></p>
+            <p>Annual Expenses: <span id="annualExpenses"></span></p>
+            <p>Annual Cash Flow: <span id="annualCashFlow"></span></p>
+            <p>Net Operating Income (NOI): <span id="noi"></span></p>
+        </div>
+        
+        <div class="output-group">
+            <h2>Key Metrics</h2>
+            <p>Cap Rate: <span id="capRate"></span></p>
+            <p>Cash on Cash Return: <span id="cashOnCash"></span></p>
+            <p>Debt Service Coverage Ratio: <span id="dscr"></span></p>
+            <p>Gross Rent Multiplier: <span id="grm"></span></p>
+        </div>
+        
+        <div class="output-group">
+            <h2>Long-term Projections</h2>
+            <p>5-Year Equity Build: <span id="fiveYearEquity"></span></p>
+            <p>10-Year Total Return: <span id="tenYearReturn"></span></p>
+            <p>Break-even Point: <span id="breakEvenPoint"></span></p>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="cashFlowChart"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="equityGrowthChart"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="roiComparisonChart"></canvas>
+    </div>
+
+    <script>
+        function calculateInvestment() {
+            // Gather input values
+            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
+            const downPayment = parseFloat(document.getElementById('downPayment').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+            const loanTerm = parseInt(document.getElementById('loanTerm').value);
+            const closingCosts = parseFloat(document.getElementById('closingCosts').value);
+            const monthlyRent = parseFloat(document.getElementById('monthlyRent').value);
+            const otherIncome = parseFloat(document.getElementById('otherIncome').value);
+            const vacancyRate = parseFloat(document.getElementById('vacancyRate').value) / 100;
+            const propertyTax = parseFloat(document.getElementById('propertyTax').value);
+            const insurance = parseFloat(document.getElementById('insurance').value);
+            const maintenance = parseFloat(document.getElementById('maintenance').value);
+            const utilities = parseFloat(document.getElementById('utilities').value);
+            const propertyManagement = parseFloat(document.getElementById('propertyManagement').value) / 100;
+            const appreciationRate = parseFloat(document.getElementById('appreciationRate').value) / 100;
+            const rentGrowthRate = parseFloat(document.getElementById('rentGrowthRate').value) / 100;
+            const expenseGrowthRate = parseFloat(document.getElementById('expenseGrowthRate').value) / 100;
+
+            // Calculate loan details
+            const loanAmount = purchasePrice - downPayment;
+            const monthlyInterestRate = interestRate / 12;
+            const numberOfPayments = loanTerm * 12;
+            const monthlyMortgage = loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
+
+            // Calculate income and expenses
+            const effectiveGrossIncome = (monthlyRent + otherIncome) * (1 - vacancyRate) * 12;
+            const annualExpenses = propertyTax + insurance + (maintenance + utilities) * 12 + effectiveGrossIncome * propertyManagement + monthlyMortgage * 12;
+            const netOperatingIncome = effectiveGrossIncome - (annualExpenses - monthlyMortgage * 12);
+            
+            // Calculate key metrics
+            const totalInitialInvestment = downPayment + closingCosts;
+            const capRate = (netOperatingIncome / purchasePrice) * 100;
+            const cashFlow = effectiveGrossIncome - annualExpenses;
+            const cashOnCashReturn = (cashFlow / totalInitialInvestment) * 100;
+            const debtServiceCoverageRatio = netOperatingIncome / (monthlyMortgage * 12);
+            const grossRentMultiplier = purchasePrice / (monthlyRent * 12);
+
+            // Long-term projections
+            let equityBuild = 0;
+            let totalReturn = 0;
+            let breakEvenMonth = 0;
+            const projectionYears = 10;
+            let cumulativeCashFlow = -totalInitialInvestment;
+            
+            const cashFlowData = [];
+            const equityData = [];
+            const roiData = [];
+
+            for (let year = 1; year <= projectionYears; year++) {
+                const yearlyAppreciation = purchasePrice * Math.pow(1 + appreciationRate, year) - purchasePrice;
+                const yearlyRent = monthlyRent * 12 * Math.pow(1 + rentGrowthRate, year);
+                const yearlyExpenses = annualExpenses * Math.pow(1 + expenseGrowthRate, year);
+                const yearlyCashFlow = yearlyRent * (1 - vacancyRate) - yearlyExpenses;
+                
+                cumulativeCashFlow += yearlyCashFlow;
+                if (cumulativeCashFlow > 0 && breakEvenMonth === 0) {
+                    breakEvenMonth = year * 12;
+                }
+
+                const loanBalance = calculateLoanBalance(loanAmount, monthlyInterestRate, numberOfPayments, year * 12);
+                const equity = (purchasePrice * Math.pow(1 + appreciationRate, year)) - loanBalance;
+                
+                if (year === 5) equityBuild = equity - (purchasePrice - loanAmount);
+                if (year === projectionYears) totalReturn = (cumulativeCashFlow + equity - totalInitialInvestment) / totalInitialInvestment * 100;
+
+                cashFlowData.push(yearlyCashFlow);
+                equityData.push(equity);
+                roiData.push((yearlyCashFlow + (equity - (purchasePrice - loanAmount))) / totalInitialInvestment * 100);
+            }
+// Update output section
+            document.getElementById('totalInitialInvestment').textContent = formatCurrency(totalInitialInvestment);
+            document.getElementById('loanAmount').textContent = formatCurrency(loanAmount);
+            document.getElementById('grossMonthlyIncome').textContent = formatCurrency((monthlyRent + otherIncome) * (1 - vacancyRate));
+            document.getElementById('monthlyExpenses').textContent = formatCurrency(annualExpenses / 12);
+            document.getElementById('monthlyCashFlow').textContent = formatCurrency(cashFlow / 12);
+            document.getElementById('grossAnnualIncome').textContent = formatCurrency(effectiveGrossIncome);
+            document.getElementById('annualExpenses').textContent = formatCurrency(annualExpenses);
+            document.getElementById('annualCashFlow').textContent = formatCurrency(cashFlow);
+            document.getElementById('noi').textContent = formatCurrency(netOperatingIncome);
+            document.getElementById('capRate').textContent = capRate.toFixed(2) + '%';
+            document.getElementById('cashOnCash').textContent = cashOnCashReturn.toFixed(2) + '%';
+            document.getElementById('dscr').textContent = debtServiceCoverageRatio.toFixed(2);
+            document.getElementById('grm').textContent = grossRentMultiplier.toFixed(2);
+            document.getElementById('fiveYearEquity').textContent = formatCurrency(equityBuild);
+            document.getElementById('tenYearReturn').textContent = totalReturn.toFixed(2) + '%';
+            document.getElementById('breakEvenPoint').textContent = breakEvenMonth + ' months';
+
+            document.getElementById('outputSection').style.display = 'grid';
+
+            // Create charts
+            createCashFlowChart(cashFlowData);
+            createEquityGrowthChart(equityData);
+            createROIComparisonChart(roiData);
+        }
+
+        function calculateLoanBalance(principal, monthlyRate, totalPayments, paymentsMade) {
+            return principal * (Math.pow(1 + monthlyRate, totalPayments) - Math.pow(1 + monthlyRate, paymentsMade)) / (Math.pow(1 + monthlyRate, totalPayments) - 1);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+        }
+
+        function createCashFlowChart(cashFlowData) {
+            const ctx = document.getElementById('cashFlowChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({length: cashFlowData.length}, (_, i) => `Year ${i + 1}`),
+                    datasets: [{
+                        label: 'Annual Cash Flow',
+                        data: cashFlowData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cash Flow ($)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Projected Annual Cash Flow'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createEquityGrowthChart(equityData) {
+            const ctx = document.getElementById('equityGrowthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: equityData.length}, (_, i) => `Year ${i + 1}`),
+                    datasets: [{
+                        label: 'Equity',
+                        data: equityData,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Equity ($)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Projected Equity Growth'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createROIComparisonChart(roiData) {
+            const ctx = document.getElementById('roiComparisonChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: roiData.length}, (_, i) => `Year ${i + 1}`),
+                    datasets: [{
+                        label: 'ROI',
+                        data: roiData,
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'ROI (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Return on Investment (ROI) Over Time'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
