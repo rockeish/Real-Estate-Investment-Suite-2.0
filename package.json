@@ -10,7 +10,6 @@
 		"app"
 	],
 	"scripts": {
-		"install": "npm install --prefix client && npm install --prefix server && npm install --prefix app",
 		"dev": "npm run dev --prefix server & npm run dev --prefix app",
 		"dev:client": "npm run dev --prefix client",
 		"dev:server": "npm run dev --prefix server",

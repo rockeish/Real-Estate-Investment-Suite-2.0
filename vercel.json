@@ -1,6 +1,5 @@
 {
-	"installCommand": "npm install --legacy-peer-deps --prefix app",
-	"buildCommand": "npm run build --prefix app",
-	"outputDirectory": "app/.next",
+	"installCommand": "sh -c 'set -e; D=app; [ -d \"$D\" ] || D=../app; cd \"$D\" && npm install --ignore-scripts --no-audit --no-fund'",
+	"buildCommand": "sh -c 'set -e; D=app; [ -d \"$D\" ] || D=../app; cd \"$D\" && npm run build'",
 	"cleanUrls": true
 }
