@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ''
 
 type PL = { startDate: string; endDate: string; income: number; expenses: number; net: number }
 
@@ -24,8 +24,8 @@ export default function ReportsPage() {
 		const load = async () => {
 			try {
 				const [plRes, rrRes] = await Promise.all([
-					fetch(`${API_BASE}/reports/pl?startDate=2024-01-01&endDate=2024-12-31`),
-					fetch(`${API_BASE}/reports/rent-roll`),
+					fetch(`${API_BASE}/api/reports/pl?startDate=2024-01-01&endDate=2024-12-31`),
+					fetch(`${API_BASE}/api/reports/rent-roll`),
 				])
 				if (!plRes.ok) throw new Error(`P&L failed: ${plRes.status}`)
 				if (!rrRes.ok) throw new Error(`Rent Roll failed: ${rrRes.status}`)

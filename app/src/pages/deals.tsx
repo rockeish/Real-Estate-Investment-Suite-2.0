@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ''
 
 type Deal = {
 	id: number
@@ -18,7 +18,7 @@ export default function DealsPage() {
 	useEffect(() => {
 		const run = async () => {
 			try {
-				const res = await fetch(`${API_BASE}/deals`)
+				const res = await fetch(`${API_BASE}/api/deals`)
 				if (!res.ok) throw new Error(`Failed: ${res.status}`)
 				const data = await res.json()
 				setDeals(data)

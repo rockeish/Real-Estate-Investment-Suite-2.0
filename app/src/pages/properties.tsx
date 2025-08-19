@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ''
 
 type Property = {
 	id: number
@@ -19,7 +19,7 @@ export default function PropertiesPage() {
 	useEffect(() => {
 		const run = async () => {
 			try {
-				const res = await fetch(`${API_BASE}/properties`)
+				const res = await fetch(`${API_BASE}/api/properties`)
 				if (!res.ok) throw new Error(`Failed: ${res.status}`)
 				setItems(await res.json())
 			} catch (e: any) {
