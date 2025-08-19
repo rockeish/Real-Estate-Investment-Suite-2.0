@@ -1,0 +1,72 @@
+{
+  "polyfillFiles": [
+    "static/chunks/polyfills-42372ed130431b0a.js"
+  ],
+  "devFiles": [],
+  "ampDevFiles": [],
+  "lowPriorityFiles": [
+    "static/BZnyxNe47iPZfzRPO91H_/_buildManifest.js",
+    "static/BZnyxNe47iPZfzRPO91H_/_ssgManifest.js"
+  ],
+  "rootMainFiles": [],
+  "pages": {
+    "/": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/chunks/pages/index-cabe741d6755c8d7.js"
+    ],
+    "/_app": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/css/d4701a1b75ea49b2.css",
+      "static/chunks/pages/_app-ae4e07bea926242c.js"
+    ],
+    "/_error": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/chunks/pages/_error-88e38b962650355f.js"
+    ],
+    "/deals": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/chunks/ebec3a01-7235012d4a70b009.js",
+      "static/chunks/877-61ea0e753adb71ad.js",
+      "static/chunks/pages/deals-94893f0824c47ac2.js"
+    ],
+    "/leases": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/chunks/pages/leases-4fa19c6d72907cff.js"
+    ],
+    "/payments": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/chunks/pages/payments-24618338bf72ab7e.js"
+    ],
+    "/properties": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/chunks/pages/properties-8e2d3eaf1a4213da.js"
+    ],
+    "/reports": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/chunks/pages/reports-6fe5b78b24fcaa00.js"
+    ],
+    "/tenants": [
+      "static/chunks/webpack-ee7e63bc15b31913.js",
+      "static/chunks/framework-9a60b6b11232a1b7.js",
+      "static/chunks/main-9966ad4be84bbb18.js",
+      "static/chunks/pages/tenants-a28b26c93c265490.js"
+    ]
+  },
+  "ampFirstPages": []
+}
