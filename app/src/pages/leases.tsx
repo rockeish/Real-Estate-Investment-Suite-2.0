@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 
-type Lease = { id: number; property_id: number; tenant_id: number; start_date: string; end_date: string; rent_amount: number; is_active: boolean }
-
 export default function LeasesPage() {
-	const [items, setItems] = useState<Lease[]>([])
+	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState(null)
 
 	useEffect(() => {
 		const run = async () => {
@@ -13,7 +11,7 @@ export default function LeasesPage() {
 				const res = await fetch('/api/leases')
 				if (!res.ok) throw new Error(`Failed: ${res.status}`)
 				setItems(await res.json())
-			} catch (e: any) {
+			} catch (e) {
 				setError(e.message)
 			} finally {
 				setLoading(false)
