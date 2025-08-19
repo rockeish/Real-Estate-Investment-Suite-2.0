@@ -2,19 +2,10 @@ import { useEffect, useState } from 'react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ''
 
-type Property = {
-	id: number
-	address: string
-	city?: string
-	state?: string
-	units?: number
-	rental_income?: number
-}
-
 export default function PropertiesPage() {
-	const [items, setItems] = useState<Property[]>([])
+	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState(null)
 
 	useEffect(() => {
 		const run = async () => {
@@ -22,7 +13,7 @@ export default function PropertiesPage() {
 				const res = await fetch(`${API_BASE}/api/properties`)
 				if (!res.ok) throw new Error(`Failed: ${res.status}`)
 				setItems(await res.json())
-			} catch (e: any) {
+			} catch (e) {
 				setError(e.message)
 			} finally {
 				setLoading(false)

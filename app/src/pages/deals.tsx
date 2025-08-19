@@ -2,18 +2,10 @@ import { useEffect, useState } from 'react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ''
 
-type Deal = {
-	id: number
-	address: string
-	status: string
-	source?: string
-	list_price?: number
-}
-
 export default function DealsPage() {
-	const [deals, setDeals] = useState<Deal[]>([])
+	const [deals, setDeals] = useState([])
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState(null)
 
 	useEffect(() => {
 		const run = async () => {
@@ -22,7 +14,7 @@ export default function DealsPage() {
 				if (!res.ok) throw new Error(`Failed: ${res.status}`)
 				const data = await res.json()
 				setDeals(data)
-			} catch (e: any) {
+			} catch (e) {
 				setError(e.message)
 			} finally {
 				setLoading(false)

@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 
-type Payment = { id: number; property_id: number; tenant_id: number; due_date: string; amount_due: number; amount_paid?: number; status: string }
-
 export default function PaymentsPage() {
-	const [items, setItems] = useState<Payment[]>([])
+	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState(null)
 
 	useEffect(() => {
 		const run = async () => {
@@ -13,7 +11,7 @@ export default function PaymentsPage() {
 				const res = await fetch('/api/payments')
 				if (!res.ok) throw new Error(`Failed: ${res.status}`)
 				setItems(await res.json())
-			} catch (e: any) {
+			} catch (e) {
 				setError(e.message)
 			} finally {
 				setLoading(false)

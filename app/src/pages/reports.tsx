@@ -2,23 +2,11 @@ import { useEffect, useState } from 'react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ''
 
-type PL = { startDate: string; endDate: string; income: number; expenses: number; net: number }
-
-type RentRollRow = {
-	lease_id: number
-	property_id: number
-	address: string
-	unit_label?: string
-	tenant_id?: number
-	tenant_name?: string
-	rent_amount: number
-}
-
 export default function ReportsPage() {
-	const [pl, setPl] = useState<PL | null>(null)
-	const [rentRoll, setRentRoll] = useState<RentRollRow[]>([])
+	const [pl, setPl] = useState(null)
+	const [rentRoll, setRentRoll] = useState([])
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState(null)
 
 	useEffect(() => {
 		const load = async () => {
@@ -32,7 +20,7 @@ export default function ReportsPage() {
 				setPl(await plRes.json())
 				const rr = await rrRes.json()
 				setRentRoll(rr.leases)
-			} catch (e: any) {
+			} catch (e) {
 				setError(e.message)
 			} finally {
 				setLoading(false)

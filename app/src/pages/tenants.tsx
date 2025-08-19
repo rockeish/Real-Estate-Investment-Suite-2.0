@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 
-type Tenant = { id: number; full_name: string; email?: string; phone_number?: string }
-
 export default function TenantsPage() {
-	const [items, setItems] = useState<Tenant[]>([])
+	const [items, setItems] = useState([])
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState<string | null>(null)
+	const [error, setError] = useState(null)
 
 	useEffect(() => {
 		const run = async () => {
@@ -13,7 +11,7 @@ export default function TenantsPage() {
 				const res = await fetch('/api/tenants')
 				if (!res.ok) throw new Error(`Failed: ${res.status}`)
 				setItems(await res.json())
-			} catch (e: any) {
+			} catch (e) {
 				setError(e.message)
 			} finally {
 				setLoading(false)
