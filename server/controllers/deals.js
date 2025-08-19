@@ -70,6 +70,9 @@ exports.createDeal = async (req, res) => {
     square_feet,
     lot_size,
     year_built,
+    agent_name,
+    agent_email,
+    agent_phone,
   } = req.body
 
   if (!address || !status) {
@@ -81,9 +84,10 @@ exports.createDeal = async (req, res) => {
       `INSERT INTO deals (
         address, city, state, postal_code, country, latitude, longitude, source, status, notes, mls_id, zillow_url,
         list_price, arv, rehab_estimate, closing_costs_estimate, purchase_costs_estimate, expected_rent,
-        holding_costs_estimate, property_type, bedrooms, bathrooms, square_feet, lot_size, year_built
+        holding_costs_estimate, property_type, bedrooms, bathrooms, square_feet, lot_size, year_built,
+        agent_name, agent_email, agent_phone
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28
       ) RETURNING *`,
       [
         address,
@@ -111,6 +115,9 @@ exports.createDeal = async (req, res) => {
         square_feet,
         lot_size,
         year_built,
+        agent_name,
+        agent_email,
+        agent_phone,
       ]
     )
     res.status(201).json(rows[0])
@@ -148,6 +155,9 @@ exports.updateDeal = async (req, res) => {
     square_feet,
     lot_size,
     year_built,
+    agent_name,
+    agent_email,
+    agent_phone,
   } = req.body
 
   try {
@@ -158,8 +168,9 @@ exports.updateDeal = async (req, res) => {
         mls_id = $11, zillow_url = $12, list_price = $13, arv = $14, rehab_estimate = $15,
         closing_costs_estimate = $16, purchase_costs_estimate = $17, expected_rent = $18,
         holding_costs_estimate = $19, property_type = $20, bedrooms = $21, bathrooms = $22,
-        square_feet = $23, lot_size = $24, year_built = $25, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $26 RETURNING *`,
+        square_feet = $23, lot_size = $24, year_built = $25, updated_at = CURRENT_TIMESTAMP,
+        agent_name = $26, agent_email = $27, agent_phone = $28
+      WHERE id = $29 RETURNING *`,
       [
         address,
         city,
@@ -186,8 +197,36 @@ exports.updateDeal = async (req, res) => {
         square_feet,
         lot_size,
         year_built,
+        agent_name,
+        agent_email,
+        agent_phone,
         id,
       ]
+    )
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Deal not found' })
+    }
+
+    res.status(200).json(rows[0])
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
+// Update a deal's status
+exports.updateDealStatus = async (req, res) => {
+  const { id } = req.params
+  const { status } = req.body
+
+  if (!status) {
+    return res.status(400).json({ error: 'Status is required.' })
+  }
+
+  try {
+    const { rows } = await db.query(
+      'UPDATE deals SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
+      [status, id]
     )
 
     if (rows.length === 0) {

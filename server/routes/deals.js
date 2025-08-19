@@ -15,6 +15,9 @@ router.post('/', dealsController.createDeal)
 // PUT /api/deals/:id - Update a deal
 router.put('/:id', dealsController.updateDeal)
 
+// PATCH /api/deals/:id/status - Update a deal's status
+router.patch('/:id/status', dealsController.updateDealStatus)
+
 // DELETE /api/deals/:id - Delete a deal
 router.delete('/:id', dealsController.deleteDeal)
 
