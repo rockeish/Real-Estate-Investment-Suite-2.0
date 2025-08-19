@@ -1,25 +1,68 @@
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api'
+
+// A single dashboard card component
+function StatCard({ label, value }) {
+  return (
+    <div className="p-4 bg-slate-100 rounded-lg shadow">
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="text-3xl font-semibold text-slate-800">{value}</p>
+    </div>
+  )
+}
 
 export default function Home() {
-	const links = [
-		{ href: '/deals', label: 'Deals' },
-		{ href: '/properties', label: 'Properties' },
-		{ href: '/tenants', label: 'Tenants' },
-		{ href: '/leases', label: 'Leases' },
-		{ href: '/payments', label: 'Payments' },
-		{ href: '/reports', label: 'Reports' },
-	]
-	return (
-		<main className="p-6 space-y-4">
-			<h1 className="text-2xl font-semibold">Real Estate Portfolio Management Suite</h1>
-			<p className="text-slate-600">Dashboard and quick links</p>
-			<nav className="flex gap-4 flex-wrap">
-				{links.map((l) => (
-					<Link key={l.href} href={l.href} className="px-3 py-2 rounded bg-slate-100 hover:bg-slate-200">
-						{l.label}
-					</Link>
-				))}
-			</nav>
-		</main>
-	)
+  const [summaryData, setSummaryData] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true)
+        const res = await fetch(`${API_BASE}/reports/summary`)
+        if (!res.ok) {
+          throw new Error('Failed to fetch summary data')
+        }
+        const data = await res.json()
+        setSummaryData(data)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <p className="text-slate-600">
+        A high-level overview of your real estate portfolio.
+      </p>
+
+      {loading && <p>Loading dashboard...</p>}
+      {error && <p className="text-red-500">Error: {error}</p>}
+
+      {summaryData && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label="Total Properties"
+            value={summaryData.total_properties}
+          />
+          <StatCard label="Active Leases" value={summaryData.active_leases} />
+          <StatCard label="Total Tenants" value={summaryData.total_tenants} />
+          <StatCard
+            label="Total Rent Collected"
+            value={new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(summaryData.total_rent_collected)}
+          />
+        </div>
+      )}
+    </div>
+  )
 }
