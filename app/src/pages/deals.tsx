@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
 import DealForm from '../components/DealForm'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api'
+const API_BASE = '' // use Next.js API routes as a proxy
 
 const columns = {
   Lead: { name: 'Lead', items: [] },
@@ -56,7 +56,7 @@ export default function DealsPage() {
   const fetchDeals = async () => {
     try {
       setLoading(true)
-      const res = await fetch(`${API_BASE}/deals`)
+      const res = await fetch(`/api/deals`)
       if (!res.ok) throw new Error(`Failed: ${res.status}`)
       const deals = await res.json()
 
@@ -92,7 +92,7 @@ export default function DealsPage() {
       setDealColumns(newColumns)
 
       try {
-        await fetch(`${API_BASE}/deals/${removed.id}/status`, {
+        await fetch(`/api/deals/${removed.id}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: destination.droppableId }),

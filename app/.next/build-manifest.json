@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/BZnyxNe47iPZfzRPO91H_/_buildManifest.js",
-    "static/BZnyxNe47iPZfzRPO91H_/_ssgManifest.js"
+    "static/VWJEclnb2W7c9CCtcpz9p/_buildManifest.js",
+    "static/VWJEclnb2W7c9CCtcpz9p/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "pages": {
@@ -14,7 +14,7 @@
       "static/chunks/webpack-ee7e63bc15b31913.js",
       "static/chunks/framework-9a60b6b11232a1b7.js",
       "static/chunks/main-9966ad4be84bbb18.js",
-      "static/chunks/pages/index-cabe741d6755c8d7.js"
+      "static/chunks/pages/index-2476d3944564ddc7.js"
     ],
     "/_app": [
       "static/chunks/webpack-ee7e63bc15b31913.js",
@@ -35,7 +35,7 @@
       "static/chunks/main-9966ad4be84bbb18.js",
       "static/chunks/ebec3a01-7235012d4a70b009.js",
       "static/chunks/877-61ea0e753adb71ad.js",
-      "static/chunks/pages/deals-94893f0824c47ac2.js"
+      "static/chunks/pages/deals-c803d4b6e5d12c40.js"
     ],
     "/leases": [
       "static/chunks/webpack-ee7e63bc15b31913.js",
@@ -53,13 +53,13 @@
       "static/chunks/webpack-ee7e63bc15b31913.js",
       "static/chunks/framework-9a60b6b11232a1b7.js",
       "static/chunks/main-9966ad4be84bbb18.js",
-      "static/chunks/pages/properties-8e2d3eaf1a4213da.js"
+      "static/chunks/pages/properties-6ce1141515f6ca7e.js"
     ],
     "/reports": [
       "static/chunks/webpack-ee7e63bc15b31913.js",
       "static/chunks/framework-9a60b6b11232a1b7.js",
       "static/chunks/main-9966ad4be84bbb18.js",
-      "static/chunks/pages/reports-6fe5b78b24fcaa00.js"
+      "static/chunks/pages/reports-615bff6fd5c4c10f.js"
     ],
     "/tenants": [
       "static/chunks/webpack-ee7e63bc15b31913.js",

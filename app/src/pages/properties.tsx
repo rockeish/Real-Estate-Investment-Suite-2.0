@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api'
+const API_BASE = ''
 
 export default function PropertiesPage() {
   const [items, setItems] = useState([])
@@ -12,9 +12,9 @@ export default function PropertiesPage() {
     const fetchProperties = async () => {
       try {
         setLoading(true)
-        let url = `${API_BASE}/properties`
+        let url = `/api/properties`
         if (searchTerm) {
-          url = `${API_BASE}/properties/search?q=${encodeURIComponent(
+          url = `/api/properties/search?q=${encodeURIComponent(
             searchTerm
           )}`
         }
