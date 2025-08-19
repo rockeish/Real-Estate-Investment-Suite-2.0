@@ -1,5 +1,5 @@
 {
-	"installCommand": "sh -c 'set -e; D=app; [ -d \"$D\" ] || D=../app; cd \"$D\" && npm ci'",
+	"installCommand": "sh -c 'set -e; D=app; [ -d \"$D\" ] || D=../app; cd \"$D\" && npm install --no-audit --no-fund'",
 	"buildCommand": "sh -c 'set -e; D=app; [ -d \"$D\" ] || D=../app; cd \"$D\" && npm run build'",
 	"cleanUrls": true
 }
