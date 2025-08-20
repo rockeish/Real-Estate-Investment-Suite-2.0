@@ -48,6 +48,11 @@ const reportsRouter = require('./routes/reports')
 
 app.use('/api/reports', reportsRouter)
 
+// Analysis router
+const analysisRouter = require('./routes/analysis')
+
+app.use('/api/analysis', analysisRouter)
+
 app.get('/', (req, res) => {
   res.send('Hello from the Real Estate Portfolio Management Suite API!')
 })
