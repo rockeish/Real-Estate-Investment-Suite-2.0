@@ -1,5 +1,7 @@
 {
-	"installCommand": "sh -c 'set -e; D=app; [ -d \"$D\" ] || D=../app; cd \"$D\" && npm install --ignore-scripts --no-audit --no-fund'",
-	"buildCommand": "sh -c 'set -e; D=app; [ -d \"$D\" ] || D=../app; cd \"$D\" && npm run build'",
-	"cleanUrls": true
+	"version": 2,
+	"cleanUrls": true,
+	"builds": [
+		{ "src": "app/next.config.js", "use": "@vercel/next" }
+	]
 }

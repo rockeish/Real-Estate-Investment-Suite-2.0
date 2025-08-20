@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api'
+const API_BASE = ''
 
 // A single dashboard card component
 function StatCard({ label, value }) {
@@ -21,7 +21,7 @@ export default function Home() {
     async function fetchData() {
       try {
         setLoading(true)
-        const res = await fetch(`${API_BASE}/reports/summary`)
+        const res = await fetch(`/api/reports/summary`)
         if (!res.ok) {
           throw new Error('Failed to fetch summary data')
         }
