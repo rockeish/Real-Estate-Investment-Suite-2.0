@@ -1,28 +1,30 @@
-const db = require('../db');
+const db = require('../db')
 
 // Get all properties
 exports.getAllProperties = async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT * FROM properties');
-    res.status(200).json(rows);
+    const { rows } = await db.query('SELECT * FROM properties')
+    res.status(200).json(rows)
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
+}
 
 // Get a single property by ID
 exports.getPropertyById = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params
   try {
-    const { rows } = await db.query('SELECT * FROM properties WHERE id = $1', [id]);
+    const { rows } = await db.query('SELECT * FROM properties WHERE id = $1', [
+      id,
+    ])
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Property not found' });
+      return res.status(404).json({ error: 'Property not found' })
     }
-    res.status(200).json(rows[0]);
+    res.status(200).json(rows[0])
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
+}
 
 // Create a new property
 exports.createProperty = async (req, res) => {
@@ -54,7 +56,7 @@ exports.createProperty = async (req, res) => {
     utilities,
     capex_rate,
     other_expenses,
-  } = req.body;
+  } = req.body
 
   try {
     const { rows } = await db.query(
@@ -67,21 +69,44 @@ exports.createProperty = async (req, res) => {
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
       ) RETURNING *`,
       [
-        address, property_type, purchase_price, bedrooms, bathrooms, square_feet, year_built, lot_size, units,
-        down_payment_percent, interest_rate, loan_term, rental_income, other_income, closing_costs, repair_costs,
-        appreciation_rate, rent_increase_rate, property_tax, insurance, hoa_fees, maintenance_rate, vacancy_rate,
-        management_rate, utilities, capex_rate, other_expenses
+        address,
+        property_type,
+        purchase_price,
+        bedrooms,
+        bathrooms,
+        square_feet,
+        year_built,
+        lot_size,
+        units,
+        down_payment_percent,
+        interest_rate,
+        loan_term,
+        rental_income,
+        other_income,
+        closing_costs,
+        repair_costs,
+        appreciation_rate,
+        rent_increase_rate,
+        property_tax,
+        insurance,
+        hoa_fees,
+        maintenance_rate,
+        vacancy_rate,
+        management_rate,
+        utilities,
+        capex_rate,
+        other_expenses,
       ]
-    );
-    res.status(201).json(rows[0]);
+    )
+    res.status(201).json(rows[0])
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
+}
 
 // Update a property
 exports.updateProperty = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params
   const {
     address,
     property_type,
@@ -110,7 +135,7 @@ exports.updateProperty = async (req, res) => {
     utilities,
     capex_rate,
     other_expenses,
-  } = req.body;
+  } = req.body
 
   try {
     const { rows } = await db.query(
@@ -122,31 +147,77 @@ exports.updateProperty = async (req, res) => {
         vacancy_rate = $23, management_rate = $24, utilities = $25, capex_rate = $26, other_expenses = $27
       WHERE id = $28 RETURNING *`,
       [
-        address, property_type, purchase_price, bedrooms, bathrooms, square_feet, year_built, lot_size, units,
-        down_payment_percent, interest_rate, loan_term, rental_income, other_income, closing_costs, repair_costs,
-        appreciation_rate, rent_increase_rate, property_tax, insurance, hoa_fees, maintenance_rate, vacancy_rate,
-        management_rate, utilities, capex_rate, other_expenses, id
+        address,
+        property_type,
+        purchase_price,
+        bedrooms,
+        bathrooms,
+        square_feet,
+        year_built,
+        lot_size,
+        units,
+        down_payment_percent,
+        interest_rate,
+        loan_term,
+        rental_income,
+        other_income,
+        closing_costs,
+        repair_costs,
+        appreciation_rate,
+        rent_increase_rate,
+        property_tax,
+        insurance,
+        hoa_fees,
+        maintenance_rate,
+        vacancy_rate,
+        management_rate,
+        utilities,
+        capex_rate,
+        other_expenses,
+        id,
       ]
-    );
+    )
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Property not found' });
+      return res.status(404).json({ error: 'Property not found' })
     }
-    res.status(200).json(rows[0]);
+    res.status(200).json(rows[0])
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
+}
+
+// Search for properties
+exports.searchProperties = async (req, res) => {
+  const { q } = req.query
+
+  if (!q) {
+    return res.status(400).json({ error: 'Search query (q) is required' })
+  }
+
+  try {
+    const { rows } = await db.query(
+      'SELECT * FROM properties WHERE address ILIKE $1 OR city ILIKE $1 OR state ILIKE $1',
+      [`%${q}%`]
+    )
+    res.status(200).json(rows)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
 
 // Delete a property
 exports.deleteProperty = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params
   try {
-    const { rows } = await db.query('DELETE FROM properties WHERE id = $1 RETURNING *', [id]);
+    const { rows } = await db.query(
+      'DELETE FROM properties WHERE id = $1 RETURNING *',
+      [id]
+    )
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Property not found' });
+      return res.status(404).json({ error: 'Property not found' })
     }
-    res.status(200).json({ message: 'Property deleted successfully' });
+    res.status(200).json({ message: 'Property deleted successfully' })
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
+}

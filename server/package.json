@@ -6,8 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "db:init": "sh -c 'psql -U $DB_USER -h $DB_HOST -p $DB_PORT -tc \"SELECT 1 FROM pg_database WHERE datname=\'$DB_DATABASE\'\" | grep -q 1 || psql -U $DB_USER -h $DB_HOST -p $DB_PORT -c \"CREATE DATABASE $DB_DATABASE\"' && psql -U $DB_USER -h $DB_HOST -p $DB_PORT -d $DB_DATABASE -f db/database.sql",
+    "test": "jest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "db:init": "dotenv -- db/init.sh",
     "db:migrate": "psql -U $DB_USER -h $DB_HOST -p $DB_PORT -d $DB_DATABASE -f db/database.sql"
   },
   "dependencies": {
@@ -17,7 +19,16 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "dotenv-cli": "^10.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "jest": "^30.0.5",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4"
   },
   "author": "",
   "license": "ISC"

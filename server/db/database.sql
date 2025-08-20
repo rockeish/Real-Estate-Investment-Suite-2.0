@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS deals (
     latitude NUMERIC(9, 6),
     longitude NUMERIC(9, 6),
     source VARCHAR(100), -- 'MLS', 'Zillow', 'Off-market', etc.
-    status VARCHAR(50) NOT NULL, -- 'Researching', 'Under Offer', 'Closed', 'Lost'
+    status VARCHAR(50) NOT NULL DEFAULT 'Lead', -- 'Lead', 'Analyzing', 'Offer Made', 'Under Contract', 'Closed', 'Lost'
     notes TEXT,
     mls_id VARCHAR(100),
     zillow_url VARCHAR(255),
@@ -215,7 +215,10 @@ CREATE TABLE IF NOT EXISTS deals (
     lot_size INTEGER,
     year_built INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    agent_name VARCHAR(255),
+    agent_email VARCHAR(255),
+    agent_phone VARCHAR(50)
 );
 CREATE INDEX IF NOT EXISTS idx_deals_status ON deals(status);
 CREATE INDEX IF NOT EXISTS idx_deals_created_at ON deals(created_at);
